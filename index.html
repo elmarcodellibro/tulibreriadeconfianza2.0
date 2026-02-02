@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Marco del Libro VIP</title>
+    
+    <link rel="apple-touch-icon" href="https://i.ibb.co/NgksQ0Sh/photo-2025-07-20-02-21-51.jpg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" type="image/png" href="https://i.ibb.co/NgksQ0Sh/photo-2025-07-20-02-21-51.jpg">
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root { 
+            --gold: #ffcc00; --blue: #0033a0; --red: #ce1126; 
+            --card: rgba(10, 20, 32, 0.9); 
+            --neon-tri: linear-gradient(45deg, #ffcc00, #0033a0, #ce1126, #ffcc00); 
+        }
+
+        body { 
+            background: #050C17; color: white; font-family: 'Montserrat', sans-serif; 
+            margin: 0; padding-bottom: 90px; min-height: 100vh; overflow-x: hidden; position: relative;
+        }
+
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 51, 160, 0.2), transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(206, 17, 38, 0.1), transparent 40%),
+                radial-gradient(1px 1px at 10% 10%, white, transparent),
+                radial-gradient(2px 2px at 40% 80%, white, transparent);
+            background-size: 100% 100%, 100% 100%, 200px 200px, 400px 400px;
+            z-index: -1; animation: spaceMove 20s linear infinite alternate;
+        }
+        @keyframes spaceMove { from { background-position: 0% 0%; } to { background-position: 5% 5%; } }
+        @keyframes neonFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        .header-container { text-align: center; padding: 30px 0; z-index: 10; position: relative; }
+        .logo-halo {
+            display: inline-block; padding: 3px; background: var(--neon-tri); 
+            background-size: 300% 300%; animation: neonFlow 4s linear infinite; 
+            border-radius: 50%; margin-bottom: 15px; box-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
+        }
+        .logo-img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; background: #050C17; display: block; }
+
+        .brand-box { display: inline-block; padding: 2px; background: var(--neon-tri); background-size: 300% 300%; animation: neonFlow 4s linear infinite; border-radius: 8px; }
+        .brand-inner { background: #000; padding: 10px 30px; border-radius: 6px; }
+        .brand-name { font-family: 'Cinzel'; color: white; font-size: 24px; letter-spacing: 4px; margin: 0; text-shadow: 0 0 10px var(--gold); }
+
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px; max-width: 1200px; margin: 0 auto; z-index: 10; position: relative; }
+        @media (min-width: 768px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+
+        .libro-card { 
+            background: var(--neon-tri); 
+            background-size: 300% 300%; 
+            animation: neonFlow 5s linear infinite; 
+            padding: 1.5px; 
+            border-radius: 20px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+        }
+
+        .libro-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(255, 204, 0, 0.4);
+            z-index: 20;
+        }
+        
+        .card-body { 
+            background: var(--card); 
+            border-radius: 19px; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            text-align: center;
+            gap: 12px; 
+            backdrop-filter: blur(10px); 
+            min-height: 380px;
+        }
+
+        .cart-item-card {
+            background: var(--neon-tri);
+            background-size: 300% 300%;
+            animation: neonFlow 5s linear infinite;
+            padding: 1.5px;
+            border-radius: 15px;
+            margin-bottom: 12px;
+        }
+        .cart-item-body {
+            background: var(--card);
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .img-box { 
+            width: 100%; 
+            height: 210px; 
+            background: white; 
+            border-radius: 12px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+            padding: 10px; 
+            box-sizing: border-box;
+        }
+        .img-box img { max-height: 100%; max-width: 100%; object-fit: contain; }
+
+        .status { 
+            font-size: 11px; 
+            font-weight: 800; 
+            padding: 4px 12px; 
+            border-radius: 6px; 
+            display: inline-block; 
+            margin-bottom: 8px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+        }
+        .status-ok { background: rgba(0, 255, 100, 0.2); color: #00ff64; border: 1.5px solid #00ff64; box-shadow: 0 0 10px rgba(0,255,100,0.2); }
+        .status-no { background: rgba(255, 0, 0, 0.2); color: #ff3333; border: 1.5px solid #ff3333; }
+
+        .panel { position: fixed; inset: 0; background: #050C17; z-index: 5000; display: none; overflow-y: auto; padding: 20px; }
+        .active { display: block; }
+        .card-ui { background: var(--card); padding: 18px; border-radius: 12px; border: 1px solid #1a2a3a; max-width: 450px; margin: 12px auto; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: white; box-sizing: border-box; }
+        .btn-gold { background: var(--gold); color: black; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; text-transform: uppercase; transition: transform 0.2s; }
+        .btn-gold:active { transform: scale(0.95); }
+
+        .nav-bot { position: fixed; bottom: 0; width: 100%; background: rgba(5, 12, 23, 0.95); display: flex; justify-content: space-around; padding: 18px 0; border-top: 1px solid #1a2a3a; z-index: 4000; }
+        .nav-bot i { font-size: 24px; cursor: pointer; color: white; }
+
+        #confirm-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); 
+            z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 11000; display: none; width: 280px; }
+    </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div id="confirm-modal">
+    <div class="card-ui" style="border: 2px solid var(--red); text-align: center;">
+        <h3 style="color: white; margin-bottom: 20px;" id="confirm-msg">¿Estás seguro de eliminar esto?</h3>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-gold" id="confirm-yes" style="background: var(--red); color: white;">SÍ, ELIMINAR</button>
+            <button class="btn-gold" id="confirm-no" style="background: #333; color: white;">CANCELAR</button>
+        </div>
+    </div>
+</div>
+
+<div id="thanks-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+    <div class="logo-halo"><img src="https://i.ibb.co/NgksQ0Sh/photo-2025-07-20-02-21-51.jpg" class="logo-img"></div>
+    <h1 style="font-family:Cinzel; color:var(--gold);">¡MUCHAS GRACIAS!</h1>
+    <p>Procesando tu pedido VIP... Serás redirigido a WhatsApp.</p>
+</div>
+
+<div id="temp-code-card" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 6000; display: none; width: 280px; text-align: center; background: #000; border: 2px solid var(--gold); border-radius: 15px; padding: 20px;">
+    <h3 style="color:var(--gold); font-family:Cinzel;">CÓDIGO VIP</h3>
+    <h1 id="display-cod" style="font-size:50px; margin:15px 0; color:white;">0000</h1>
+    <div style="width: 100%; height: 5px; background: #222; margin-top: 15px; border-radius: 5px; overflow: hidden;">
+        <div id="fill" style="height: 100%; background: var(--gold); width: 100%; transition: width 10s linear;"></div>
+    </div>
+</div>
+
+<div id="main-view">
+    <div class="header-container">
+        <div class="logo-halo"><img src="https://i.ibb.co/NgksQ0Sh/photo-2025-07-20-02-21-51.jpg" class="logo-img"></div><br>
+        <div class="brand-box"><div class="brand-inner"><h1 class="brand-name">EL MARCO DEL LIBRO</h1></div></div>
+        <div style="margin-top: 25px; padding: 0 20px; max-width: 500px; margin: auto;">
+            <input type="text" id="busq-tienda" placeholder="🔍 Buscar libro o autor..." onkeyup="filtrarTienda()">
+        </div>
+    </div>
+    <div id="box-libros" class="grid"></div>
+</div>
+
+<div class="nav-bot">
+    <i class="fas fa-home" onclick="cerrarPaneles()"></i>
+    <div onclick="abrirPanel('p-cart')" style="position:relative;">
+        <i class="fas fa-shopping-cart"></i>
+        <span id="badge" style="position:absolute; top:-8px; right:-12px; background:red; padding:2px 6px; border-radius:50%; font-size:10px; display:none;">0</span>
+    </div>
+    <i class="fas fa-user-shield" onclick="irPerfil()"></i>
+</div>
+
+<div id="p-cart" class="panel">
+    <div style="max-width:500px; margin:auto;">
+        <button onclick="cerrarPaneles()" class="btn-gold" style="width:auto; padding:8px 15px; margin-bottom:20px;">ATRÁS</button>
+        <h2 style="text-align:center; color:var(--gold); font-family:Cinzel; margin-bottom:20px;">CARRITO VIP</h2>
+        <div id="cart-list"></div>
+        <div id="cart-footer" style="text-align:center; margin-top:30px; display:none; background:rgba(255,255,255,0.05); padding:20px; border-radius:15px;">
+            <h2 id="total-cart" style="color:var(--gold); font-size:28px; margin-bottom:15px;"></h2>
+            <button class="btn-gold" onclick="finalizarCompra()">CONFIRMAR PEDIDO</button>
+        </div>
+    </div>
+</div>
+
+<div id="p-auth" class="panel">
+    <div class="card-ui" id="v-login">
+        <h2 style="text-align:center; color:var(--gold);">LOGIN VIP</h2>
+        <input type="email" id="l-email" placeholder="Correo">
+        <input type="password" id="l-pass" placeholder="Contraseña">
+        <button class="btn-gold" onclick="login()">ENTRAR</button>
+        <p onclick="cambiarVistaAuth('v-reg')" style="text-align:center; cursor:pointer; color:gray; margin-top:15px;">¿Eres nuevo? <b>Regístrate aquí</b></p>
+    </div>
+    <div class="card-ui" id="v-reg" style="display:none;">
+        <h2 style="text-align:center; color:var(--gold);">REGISTRO VIP</h2>
+        <input type="text" id="r-nom" placeholder="Nombre completo">
+        <input type="email" id="r-email" placeholder="Correo electrónico">
+        <input type="tel" id="r-tel" placeholder="WhatsApp (Ej: +58...)">
+        <input type="password" id="r-pass" placeholder="Crea tu contraseña">
+        <button class="btn-gold" id="btn-cod" onclick="solicitarCodigoVIP()">GENERAR CÓDIGO</button>
+        <div id="sec-cod" style="display:none;">
+            <input type="number" id="v-cod" placeholder="Escribe el código">
+            <button class="btn-gold" onclick="validarRegistro()" style="background:#28a745;">VERIFICAR</button>
+        </div>
+    </div>
+</div>
+
+<div id="p-admin" class="panel">
+    <div style="max-width:700px; margin:auto;">
+        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:20px;">
+            <h2 style="color:var(--gold);">ADMINISTRACIÓN</h2>
+            <button onclick="cerrarPaneles()" style="background:none; color:white; border:1px solid #444; padding:5px 15px;">X</button>
+        </div>
+        
+        <div id="recaudacion-box" class="card-ui" style="text-align:center; background:var(--gold); color:black; display:none;">
+            <p style="margin:0; font-weight:bold;">RECAUDACIÓN HISTÓRICA</p>
+            <h1 id="total-ventas-suma" style="margin:0;">$0.00</h1>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px;">
+            <button class="btn-gold" style="font-size:10px;" onclick="verAdminSeccion('inv')">INVENTARIO</button>
+            <button class="btn-gold" style="font-size:10px;" onclick="verAdminSeccion('ventas')">VENTAS</button>
+            <button class="btn-gold" style="font-size:10px;" onclick="verAdminSeccion('users')">CLIENTES</button>
+        </div>
+        
+        <div id="admin-content" style="margin-top:20px;"></div>
+        <button class="btn-gold" onclick="abrirFormLibro()" style="background:white; color:black; margin-top:20px;">+ AÑADIR PUBLICACIÓN</button>
+        <button class="btn-gold" onclick="logout()" style="background:#ce1126; color:white; margin-top:10px;">CERRAR SESIÓN</button>
+    </div>
+</div>
+
+<div id="p-form" class="panel">
+    <div class="card-ui">
+        <h2 style="text-align:center; color:var(--gold);">DATOS DEL LIBRO</h2>
+        <input type="hidden" id="f-id">
+        <input type="text" id="f-titulo" placeholder="Título del libro">
+        <input type="number" step="0.01" id="f-precio" placeholder="Precio Base ($)">
+        <input type="number" id="f-stock" placeholder="Stock disponible">
+        <input type="file" id="f-file" accept="image/*">
+        <input type="hidden" id="f-img-url">
+        <div id="preview-img" style="text-align:center; margin:10px 0;"></div>
+        <button class="btn-gold" id="btn-save" onclick="guardarLibro()">GUARDAR CAMBIOS</button>
+        <button onclick="abrirPanel('p-admin')" style="width:100%; border:none; background:none; color:gray; margin-top:15px; cursor:pointer;">Cancelar</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue, set, remove, serverTimestamp, runTransaction, get } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDQxdTydVQUwtKeuY6EldDkQgG06CAlkxU",
+        authDomain: "el-marco-del-libro.firebaseapp.com",
+        projectId: "el-marco-del-libro",
+        databaseURL: "https://el-marco-del-libro-default-rtdb.firebaseio.com",
+        appId: "1:93737260691:web:cbabddd81aa7a302f29f66"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const SOUNDS = {
+        add: "https://www.myinstants.com/media/sounds/discord-notification.mp3",
+        success: "https://www.myinstants.com/media/sounds/ka-ching.mp3"
+    };
+
+    let inventario = [], carrito = [], user = JSON.parse(localStorage.getItem('user_marco')) || null, codS = null;
+    let tasaUSDT = 509.41, tasaBCV = 370.25; // Valores base de seguridad
+
+    function playS(tipo) {
+        const audio = new Audio(SOUNDS[tipo]);
+        audio.volume = 0.5;
+        audio.play().catch(()=>{});
+    }
+
+    function customConfirm(mensaje) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('confirm-modal');
+            const msgEl = document.getElementById('confirm-msg');
+            const yesBtn = document.getElementById('confirm-yes');
+            const noBtn = document.getElementById('confirm-no');
+            msgEl.innerText = mensaje;
+            modal.style.display = 'flex';
+            const handleResponse = (res) => {
+                modal.style.display = 'none';
+                yesBtn.onclick = null; noBtn.onclick = null;
+                resolve(res);
+            };
+            yesBtn.onclick = () => handleResponse(true);
+            noBtn.onclick = () => handleResponse(false);
+        });
+    }
+
+    // --- ESCUCHA DE TASAS ---
+    onValue(ref(db, 'tasas'), (snap) => {
+        const d = snap.val();
+        if(d) {
+            tasaUSDT = parseFloat(d.usdt) || 509.41;
+            tasaBCV = parseFloat(d.bcv) || 370.25;
+            renderTienda(inventario);
+            actualizarCarritoUI();
+        }
+    });
+
+    onValue(ref(db, 'libros'), (snapshot) => {
+        const data = snapshot.val();
+        inventario = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+        renderTienda(inventario);
+    });
+
+    function renderTienda(data) {
+        const factor = tasaUSDT / tasaBCV;
+        document.getElementById('box-libros').innerHTML = data.map(l => {
+            const agotado = l.stock <= 0;
+            // APLICACIÓN DE LÓGICA: BASE * (USDT / BCV)
+            const precioVenta = (parseFloat(l.precio) * factor).toFixed(2);
+            return `
+            <div class="libro-card">
+                <div class="card-body">
+                    <div class="img-box"><img src="${l.imagen}"></div>
+                    <div class="info-box" style="width:100%;">
+                        <span class="status ${agotado ? 'status-no' : 'status-ok'}">${agotado ? 'AGOTADO' : 'DISPONIBLE'}</span>
+                        <b style="font-size:13px; display:block; height:35px; overflow:hidden; margin-bottom:5px;">${l.titulo}</b>
+                        <span style="color:var(--gold); font-weight:bold; font-size:18px;">$${precioVenta}</span><br>
+                        <button class="btn-gold" onclick="addToCart('${l.id}')" style="padding:8px; font-size:11px; margin-top:8px;" ${agotado ? 'disabled' : ''}>AÑADIR AL CARRITO</button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    window.solicitarCodigoVIP = () => {
+        playS('add');
+        codS = Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('display-cod').innerText = codS;
+        document.getElementById('temp-code-card').style.display = 'block';
+        document.getElementById('fill').style.width = '100%';
+        setTimeout(() => document.getElementById('fill').style.width = '0%', 100);
+        setTimeout(() => {
+            document.getElementById('temp-code-card').style.display = 'none';
+            document.getElementById('sec-cod').style.display = 'block';
+            document.getElementById('btn-cod').style.display = 'none';
+        }, 10000);
+    };
+
+    window.validarRegistro = async () => {
+        if(document.getElementById('v-cod').value != codS) return notify("Código incorrecto", "error");
+        const nombre = document.getElementById('r-nom').value;
+        const correo = document.getElementById('r-email').value.toLowerCase();
+        const tel = document.getElementById('r-tel').value;
+        const pass = document.getElementById('r-pass').value;
+        const u = { nombre, correo, pass, telefono: tel, timestamp: serverTimestamp() };
+        try {
+            await push(ref(db, 'usuarios'), u);
+            const fechaActual = new Date().toLocaleString();
+            const mensajeReg = `✅ <b>NUEVO CLIENTE VIP</b>\n\n👤 <b>Nombre:</b> ${nombre}\n📱 <b>WhatsApp:</b> ${tel}\n📧 <b>Email:</b> ${correo}\n📅 <b>Fecha:</b> ${fechaActual}`;
+            await enviarTelegram(mensajeReg);
+            notify("¡Registro Exitoso!");
+            setTimeout(() => { location.reload(); }, 1500);
+        } catch (error) { notify("Error en el proceso", "error"); }
+    };
+
+    window.finalizarCompra = async () => {
+        playS('success');
+        const totalFinal = document.getElementById('total-cart').innerText;
+        let msgW = `🔔 <b>PEDIDO VIP</b>\n👤 <b>Cliente:</b> ${user.nombre}\n🛒 <b>Detalle:</b>\n`;
+        for(const item of carrito) {
+            msgW += `📖 ${item.titulo} (x${item.cant})\n`;
+            await runTransaction(ref(db, `libros/${item.id}/stock`), (c) => (c || 0) - item.cant);
+        }
+        msgW += `💰 <b>TOTAL: ${totalFinal}</b>`;
+        const montoLimpio = parseFloat(totalFinal.replace(/[^0-9.]/g, '')) || 0;
+        await push(ref(db, 'ventas'), { cliente: user.nombre, total: totalFinal, detalle: msgW, fecha: serverTimestamp(), monto: montoLimpio });
+        enviarTelegram(msgW);
+        document.getElementById('thanks-modal').style.display = 'flex';
+        setTimeout(() => {
+            window.location.href = `https://wa.me/584127145675?text=${encodeURIComponent(msgW.replace(/<[^>]*>/g, ''))}`;
+        }, 3000);
+    };
+
+    window.addToCart = (id) => {
+        playS('add');
+        if(!user) return abrirPanel('p-auth');
+        const l = inventario.find(x => x.id === id);
+        const ex = carrito.find(x => x.id === id);
+        if(ex) {
+            if(ex.cant < l.stock) ex.cant++; else notify("Límite de stock alcanzado", "error");
+        } else {
+            carrito.push({...l, cant: 1});
+        }
+        actualizarCarritoUI();
+    };
+
+    window.modificarCant = (index, valor) => {
+        const item = carrito[index];
+        const original = inventario.find(x => x.id === item.id);
+        if(valor === 0) {
+            carrito.splice(index, 1);
+        } else {
+            const nuevaCant = item.cant + valor;
+            if(nuevaCant > 0 && nuevaCant <= original.stock) item.cant = nuevaCant;
+        }
+        actualizarCarritoUI();
+    };
+
+    function actualizarCarritoUI() {
+        const factor = tasaUSDT / tasaBCV;
+        const can = carrito.reduce((a,b)=> a+b.cant, 0);
+        document.getElementById('badge').innerText = can;
+        document.getElementById('badge').style.display = can > 0 ? 'block' : 'none';
+        let t = 0;
+        document.getElementById('cart-list').innerHTML = carrito.map((it, i) => {
+            const pVentaIndividual = parseFloat(it.precio) * factor;
+            t += pVentaIndividual * it.cant;
+            return `
+            <div class="cart-item-card">
+                <div class="cart-item-body">
+                    <img src="${it.imagen}" width="50" height="70" style="object-fit:contain; background:white; border-radius:8px;">
+                    <div style="flex:1;">
+                        <b style="font-size:12px; display:block; margin-bottom:4px; line-height:1.2;">${it.titulo}</b>
+                        <span style="color:var(--gold); font-weight:bold;">$${pVentaIndividual.toFixed(2)}</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button class="btn-gold" style="width:28px; height:28px; padding:0; display:flex; align-items:center; justify-content:center;" onclick="modificarCant(${i}, -1)">-</button>
+                        <span style="font-weight:bold; min-width:20px; text-align:center;">${it.cant}</span>
+                        <button class="btn-gold" style="width:28px; height:28px; padding:0; display:flex; align-items:center; justify-content:center;" onclick="modificarCant(${i}, 1)">+</button>
+                        <button class="btn-gold" style="width:28px; height:28px; padding:0; background:var(--red); color:white; display:flex; align-items:center; justify-content:center;" onclick="modificarCant(${i}, 0)">
+                            <i class="fas fa-trash-alt" style="font-size:12px;"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+        document.getElementById('total-cart').innerText = `TOTAL: $${t.toFixed(2)}`;
+        document.getElementById('cart-footer').style.display = can > 0 ? 'block' : 'none';
+    }
+
+    async function enviarTelegram(m) {
+        return fetch(`https://api.telegram.org/bot8505542737:AAEqxdrmDhiv0tIVOzbvz6ucQivhzIqK958/sendMessage`, {
+            method: "POST", headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ chat_id: "6927035550", text: m, parse_mode: "HTML" })
+        });
+    }
+
+    window.login = async () => {
+        playS('add');
+        const c = document.getElementById('l-email').value.toLowerCase().trim();
+        const p = document.getElementById('l-pass').value;
+        if(c === "elmarcodellibro@gmail.com" && p === "Babilonia*1") {
+            user = { nombre: "Administrador", rol: "ADMIN" };
+            localStorage.setItem('user_marco', JSON.stringify(user));
+            location.reload(); return;
+        }
+        const snap = await get(ref(db, 'usuarios'));
+        const users = snap.val();
+        for(let k in users) if(users[k].correo === c && users[k].pass === p) {
+            user = { ...users[k], rol: "CLIENTE" };
+            localStorage.setItem('user_marco', JSON.stringify(user));
+            location.reload(); return;
+        }
+        notify("Credenciales incorrectas", "error");
+    };
+
+    window.abrirPanel = (id) => { playS('add'); cerrarPaneles(); document.getElementById(id).classList.add('active'); };
+    window.cerrarPaneles = () => document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    window.cambiarVistaAuth = (v) => { document.getElementById('v-login').style.display = v==='v-reg'?'none':'block'; document.getElementById('v-reg').style.display = v==='v-reg'?'block':'none'; };
+    window.irPerfil = () => { if(!user) abrirPanel('p-auth'); else if(user.rol==='ADMIN') abrirPanel('p-admin'); else notify("Hola VIP, " + user.nombre); };
+    window.logout = () => { localStorage.removeItem('user_marco'); location.reload(); };
+    
+    window.eliminarProducto = async (id) => { 
+        if(await customConfirm("¿Eliminar publicación definitivamente?")) {
+            remove(ref(db, `libros/${id}`)); 
+            notify("Producto eliminado");
+        }
+    };
+
+    window.borrarVentas = async () => { 
+        if(await customConfirm("¿Borrar todo el historial de ventas?")) {
+            set(ref(db, 'ventas'), null).then(()=>verAdminSeccion('ventas')); 
+            notify("Historial borrado");
+        }
+    };
+
+    window.borrarClientes = async () => { 
+        if(await customConfirm("¿Eliminar a todos los clientes registrados?")) {
+            set(ref(db, 'usuarios'), null).then(()=>verAdminSeccion('users')); 
+            notify("Clientes eliminados");
+        }
+    };
+    
+    window.abrirFormLibro = (id=null) => {
+        abrirPanel('p-form');
+        const l = id ? inventario.find(x => x.id === id) : null;
+        document.getElementById('f-id').value = id || "";
+        document.getElementById('f-titulo').value = l ? l.titulo : "";
+        document.getElementById('f-precio').value = l ? l.precio : "";
+        document.getElementById('f-stock').value = l ? l.stock : "";
+        document.getElementById('f-img-url').value = l ? l.imagen : "";
+        document.getElementById('preview-img').innerHTML = l ? `<img src="${l.imagen}" width="80">` : "";
+    };
+
+    window.verAdminSeccion = async (t) => {
+        playS('add');
+        const cont = document.getElementById('admin-content');
+        const recBox = document.getElementById('recaudacion-box');
+        const factor = tasaUSDT / tasaBCV; // Factor para cálculo en admin
+        recBox.style.display = (t === 'ventas') ? 'block' : 'none';
+        cont.innerHTML = "Cargando...";
+
+        if(t === 'inv') {
+            cont.classList.add('grid');
+            cont.innerHTML = inventario.map(l => {
+                const precioBase = parseFloat(l.precio);
+                const precioWeb = (precioBase * factor).toFixed(2);
+                const utilidad = (precioWeb - precioBase).toFixed(2);
+                return `
+                <div class="libro-card">
+                    <div class="card-body" style="height:auto; min-height:auto;">
+                        <div class="img-box" style="height:120px;"><img src="${l.imagen}"></div>
+                        <div style="width:100%;">
+                            <b style="font-size:12px;">${l.titulo}</b><br>
+                            <span style="color:var(--gold); font-size:10px;">BASE: $${precioBase.toFixed(2)}</span><br>
+                            <span style="color:var(--gold); font-weight:bold;">WEB: $${precioWeb}</span><br>
+                            <span style="color:#00ff64; font-size:10px;">GANANCIA: +$${utilidad}</span><br>
+                            <div style="margin-top:10px; display:flex; gap:5px;">
+                                <button class="btn-gold" style="padding:5px; font-size:9px;" onclick="abrirFormLibro('${l.id}')">EDITAR</button>
+                                <button class="btn-gold" style="background:#ce1126; color:white; padding:5px; font-size:9px;" onclick="eliminarProducto('${l.id}')">BORRAR</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        } else if(t === 'users') {
+            cont.classList.remove('grid');
+            const snap = await get(ref(db, 'usuarios'));
+            const u = snap.val();
+            let html = u ? Object.values(u).reverse().map(us => `<div class="card-ui" style="width:100%">👤 <b>${us.nombre}</b><br>📞 ${us.telefono}<br>📧 ${us.correo}</div>`).join('') : "Sin clientes.";
+            cont.innerHTML = `<button onclick="borrarClientes()" style="color:red; background:none; border:1px solid red; width:100%; cursor:pointer; margin-bottom:10px; font-weight:bold; padding:10px; border-radius:8px;">🗑️ BORRAR LISTA DE CLIENTES</button>` + html;
+        } else {
+            cont.classList.remove('grid');
+            const snap = await get(ref(db, 'ventas'));
+            const v = snap.val();
+            let totalSuma = 0;
+            if(!v) { cont.innerHTML = "Sin ventas."; return; }
+            const html = Object.keys(v).reverse().map(k => {
+                totalSuma += v[k].monto || 0;
+                return `<div class="card-ui" style="font-size:11px; width:100%;">📅 ${v[k].fecha ? new Date(v[k].fecha).toLocaleString() : ''}<br>${v[k].detalle}</div>`;
+            }).join('');
+            document.getElementById('total-ventas-suma').innerText = `$${totalSuma.toFixed(2)}`;
+            cont.innerHTML = `<button onclick="borrarVentas()" style="color:red; background:none; border:none; width:100%; cursor:pointer; margin-bottom:10px; font-weight:bold;">🗑️ BORRAR HISTORIAL DE VENTAS</button>` + html;
+        }
+    };
+
+    window.guardarLibro = async () => {
+        playS('add');
+        const btn = document.getElementById('btn-save');
+        btn.disabled = true; btn.innerText = "PROCESANDO...";
+        const file = document.getElementById('f-file').files[0];
+        let url = document.getElementById('f-img-url').value;
+        try {
+            if(file) {
+                const fd = new FormData(); fd.append("image", file);
+                const res = await fetch("https://api.imgbb.com/1/upload?key=164856aa0f9e3a7d6a856729cdf46660", { method: "POST", body: fd });
+                const d = await res.json();
+                url = d.data.url;
+            }
+            const id = document.getElementById('f-id').value;
+            const data = { 
+                titulo: document.getElementById('f-titulo').value, 
+                precio: parseFloat(document.getElementById('f-precio').value), 
+                stock: parseInt(document.getElementById('f-stock').value), 
+                imagen: url || "https://via.placeholder.com/150"
+            };
+            if(id) await set(ref(db, `libros/${id}`), data); else await push(ref(db, 'libros'), data);
+            notify("Guardado exitosamente");
+            abrirPanel('p-admin'); verAdminSeccion('inv');
+        } catch(e) { notify("Error al subir", "error"); }
+        finally { btn.disabled = false; btn.innerText = "GUARDAR CAMBIOS"; }
+    };
+
+    window.filtrarTienda = () => {
+        const t = document.getElementById('busq-tienda').value.toLowerCase();
+        renderTienda(inventario.filter(x => x.titulo.toLowerCase().includes(t)));
+    };
+
+    function notify(m, t='success') {
+        const el = document.getElementById('toast');
+        el.innerHTML = `<div class="card-ui" style="background:${t==='success'?'#1b4d31':'#4d1b1b'}; color:white; padding:10px; border:1px solid white; text-align:center;">${m}</div>`;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 2000);
+    }
+</script>
+</body>
+</html>
