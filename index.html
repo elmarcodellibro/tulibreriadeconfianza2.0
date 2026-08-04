@@ -637,61 +637,71 @@
                     <img src="https://i.ibb.co/fzLdHtMW/elmarcodellibro.jpg" style="width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--gold); margin-bottom: 10px;">
                     <h3 id="auth-form-title">Iniciar Sesión</h3>
                 </div>
+<!-- FORMULARIO 1: INICIAR SESIÓN -->
+<form id="form-login" onsubmit="event.preventDefault(); processLogin();">
+    <div class="form-group">
+        <label>Correo Electrónico</label>
+        <input type="email" id="login-email" class="form-control" placeholder="tuemail@ejemplo.com" required>
+    </div>
+    <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-pass" class="form-control" placeholder="••••••••" required>
+    </div>
+    <button type="submit" class="btn" style="width: 100%; margin-top: 15px;">Ingresar</button>
+    
+    <div style="text-align: center; margin-top: 15px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+        <a onclick="toggleAuthForms('register')" style="font-size: 0.85rem; color: var(--gold-bright); cursor: pointer; font-weight: 600;">¿No tienes cuenta? Regístrate</a>
+        <a onclick="toggleForgotPasswordBox()" style="font-size: 0.85rem; color: var(--text-light); cursor: pointer;"><i class="fas fa-key"></i> Olvidé clave</a>
+    </div>
+</form>
 
-                <!-- FORMULARIO 1: INICIAR SESIÓN -->
-                <form id="form-login" onsubmit="event.preventDefault(); processLogin();">
-                    <div class="form-group">
-                        <label>Correo Electrónico</label>
-                        <input type="email" id="login-email" class="form-control" placeholder="tuemail@ejemplo.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Contraseña</label>
-                        <input type="password" id="login-pass" class="form-control" placeholder="••••••••" required>
-                    </div>
-                    <button type="submit" class="btn" style="width: 100%; margin-top: 15px;">Ingresar</button>
-                    
-                    <div style="text-align: center; margin-top: 15px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
-                        <a onclick="toggleAuthForms('register')" style="font-size: 0.85rem; color: var(--gold-bright); cursor: pointer; font-weight: 600;">¿No tienes cuenta? Regístrate</a>
-                        <a onclick="toggleForgotPasswordBox()" style="font-size: 0.85rem; color: var(--text-light); cursor: pointer;"><i class="fas fa-key"></i> Olvidé clave</a>
-                    </div>
-                </form>
+<!-- FORMULARIO 2: REGISTRO -->
+<form id="form-register" style="display: none;" onsubmit="event.preventDefault(); processRegister();">
+    <div class="form-group">
+        <label>Nombre Completo</label>
+        <input type="text" id="reg-name" class="form-control" placeholder="Ej: Juan Perez" required>
+    </div>
+    <div class="form-group">
+        <label>Correo Electrónico</label>
+        <input type="email" id="reg-email" class="form-control" placeholder="tuemail@ejemplo.com" required>
+    </div>
+    <div class="form-group">
+        <label>Crear Contraseña</label>
+        <input type="password" id="reg-pass" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6">
+    </div>
+    <button type="submit" class="btn" style="width: 100%; background: var(--success); border-color: var(--success); color:#fff; margin-top: 15px;">Crear mi Cuenta</button>
+    
+    <div style="text-align: center; margin-top: 15px;">
+        <a onclick="toggleAuthForms('login')" style="font-size: 0.85rem; color: var(--gold-bright); cursor: pointer; font-weight: 600;">¿Ya tienes cuenta? Inicia Sesión</a>
+    </div>
+</form>
 
-                <!-- FORMULARIO 2: REGISTRO -->
-                <form id="form-register" style="display: none;" onsubmit="event.preventDefault(); processRegister();">
-                    <div class="form-group">
-                        <label>Nombre Completo</label>
-                        <input type="text" id="reg-name" class="form-control" placeholder="Ej: Juan Perez" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Correo Electrónico</label>
-                        <input type="email" id="reg-email" class="form-control" placeholder="tuemail@ejemplo.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Crear Contraseña</label>
-                        <input type="password" id="reg-pass" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6">
-                    </div>
-                    <button type="submit" class="btn" style="width: 100%; background: var(--success); border-color: var(--success); color:#fff; margin-top: 15px;">Crear mi Cuenta</button>
-                    
-                    <div style="text-align: center; margin-top: 15px;">
-                        <a onclick="toggleAuthForms('login')" style="font-size: 0.85rem; color: var(--gold-bright); cursor: pointer; font-weight: 600;">¿Ya tienes cuenta? Inicia Sesión</a>
-                    </div>
-                </form>
+<!-- RECUPERACIÓN DE CONTRASEÑA -->
+<div id="forgot-password-box" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color);">
+    <h4 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--primary);">Restablecer Contraseña</h4>
+    <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 12px;">Ingresa tu correo registrado para iniciar la recuperación:</p>
+    <div class="form-group">
+        <input type="email" id="forgot-email-input" class="form-control" placeholder="tu-correo@ejemplo.com">
+    </div>
+    <div style="display: flex; gap: 8px;">
+        <button type="button" class="btn" style="padding: 6px 12px; font-size: 0.8rem;" onclick="processForgotPassword()">Enviar Instrucciones</button>
+        <button type="button" class="btn-back" style="margin: 0; padding: 6px 12px;" onclick="toggleForgotPasswordBox()">Cancelar</button>
+    </div>
+</div>
 
-                <!-- RECUPERACIÓN DE CONTRASEÑA -->
-                <div id="forgot-password-box" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color);">
-                    <h4 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--primary);">Restablecer Contraseña</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 12px;">Ingresa tu correo registrado para iniciar la recuperación:</p>
-                    <div class="form-group">
-                        <input type="email" id="forgot-email-input" class="form-control" placeholder="tu-correo@ejemplo.com">
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button type="button" class="btn" style="padding: 6px 12px; font-size: 0.8rem;" onclick="processForgotPassword()">Enviar Instrucciones</button>
-                        <button type="button" class="btn-back" style="margin: 0; padding: 6px 12px;" onclick="toggleForgotPasswordBox()">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-        </main>
+<!-- FORMULARIO 3: NUEVA CONTRASEÑA (CUANDO VIENE DEL CORREO) -->
+<form id="form-new-password" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color);" onsubmit="event.preventDefault(); processUpdatePassword();">
+    <h4 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--primary);">Establecer Nueva Contraseña</h4>
+    <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 12px;">Ingresa tu nueva clave de acceso:</p>
+    <div class="form-group">
+        <label>Nueva Contraseña</label>
+        <input type="password" id="new-pass-input" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6">
+    </div>
+    <button type="submit" class="btn" style="width: 100%; background: var(--success); border-color: var(--success); color:#fff; margin-top: 15px;">Actualizar Contraseña</button>
+</form>
 
+</div>
+</main>
         <!-- PANTALLA 5: MIS COMPRAS -->
         <main id="view-my-purchases" class="page-view">
             <button class="btn-back" onclick="navigateTo('view-home')"><i class="fas fa-arrow-left"></i> Volver al Inicio</button>
@@ -1074,12 +1084,30 @@
            2. CARGA BASE DE SUPABASE
         ------------------------------------------------------------- */
         window.addEventListener('DOMContentLoaded', () => {
-            populateCitiesDropdown();
-            updateUIState();
-            fetchExchangeRate();
-            setupRealtimeSubscriptions();
-            loadDataFromSupabase();
-        });
+    populateCitiesDropdown();
+    updateUIState();
+    fetchExchangeRate();
+    setupRealtimeSubscriptions();
+    loadDataFromSupabase();
+
+    // Detectar si el usuario viene de un enlace de recuperación de Supabase
+    const hash = window.location.hash;
+    if (hash && (hash.includes('type=recovery') || hash.includes('access_token'))) {
+        navigateTo('view-auth');
+        const loginForm = document.getElementById('form-login');
+        const regForm = document.getElementById('form-register');
+        const forgotBox = document.getElementById('forgot-password-box');
+        const newPassForm = document.getElementById('form-new-password');
+        
+        if(loginForm) loginForm.style.display = 'none';
+        if(regForm) regForm.style.display = 'none';
+        if(forgotBox) forgotBox.style.display = 'none';
+        if(newPassForm) newPassForm.style.display = 'block';
+        
+        const titleEl = document.getElementById('auth-form-title');
+        if(titleEl) titleEl.innerText = "Nueva Contraseña";
+    }
+});
 
         function populateCitiesDropdown() {
             const select = document.getElementById('prof-city-select');
@@ -1659,7 +1687,36 @@
                 navigateTo('view-home');
             } catch(e) {}
         }
+        async function processUpdatePassword() {
+    const newPassInput = document.getElementById('new-pass-input');
+    const newPassword = newPassInput ? newPassInput.value.trim() : '';
 
+    if (!newPassword || newPassword.length < 6) {
+        showToast("Atención", "La contraseña debe tener al menos 6 caracteres.");
+        return;
+    }
+
+    try {
+        const { error } = await supabaseClient.auth.updateUser({
+            password: newPassword
+        });
+
+        if (error) {
+            showToast("Error", error.message);
+            return;
+        }
+
+        showToast("¡Contraseña Actualizada!", "Ya puedes iniciar sesión con tu nueva clave.");
+        
+        window.location.hash = '';
+        toggleAuthForms('login');
+        if(newPassInput) newPassInput.value = '';
+        navigateTo('view-auth');
+
+    } catch (err) {
+        showToast("Error", "No se pudo actualizar la contraseña.");
+    }
+}
         /* -------------------------------------------------------------
            4. NAVEGACIÓN Y VISTAS
         ------------------------------------------------------------- */
