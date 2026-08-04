@@ -331,77 +331,79 @@
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
         }
-      /* --- Ajuste exacto para la cabecera y el banner en móviles --- */
-    @media (max-width: 768px) {
-        .nav-container {
-            height: auto;
-            padding: 12px 15px;
-            flex-direction: column;
-            gap: 12px;
-            position: relative;
-        /* --- Pestañas del admin en móvil --- */
-        .admin-nav-tabs {
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            gap: 6px;
-            padding-bottom: 8px;
-            width: 100%;
-            -webkit-overflow-scrolling: touch;
+
+        /* --- Ajuste exacto para la cabecera y el banner en móviles --- */
+        @media (max-width: 768px) {
+            .nav-container {
+                height: auto;
+                padding: 12px 15px;
+                flex-direction: column;
+                gap: 12px;
+                position: relative;
+            }
+
+            /* --- Pestañas del admin en móvil --- */
+            .admin-nav-tabs {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                gap: 6px;
+                padding-bottom: 8px;
+                width: 100%;
+                -webkit-overflow-scrolling: touch;
+            }
+            .admin-tab-btn {
+                flex: 0 0 auto;
+                font-size: 0.78rem !important;
+                padding: 6px 12px !important;
+            }
+
+            .header-logo-group {
+                width: 80% !important;
+                justify-content: flex-start;
+            }
+            .logo {
+                font-size: 0.82rem !important;
+                white-space: normal !important;
+                line-height: 1.2;
+            }
+            .header-search-wrapper {
+                max-width: 100% !important;
+                width: 100%;
+                order: 3;
+            }
+            .nav-menu {
+                order: 2;
+            }
+            .nav-actions {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+            }
+            
+            body {
+                padding-top: 145px;
+            }
+            .hero {
+                padding-top: 50px !important;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            .hero-logo {
+                margin-top: 15px !important;
+                margin-bottom: 20px !important;
+                display: inline-block;
+            }
         }
-        .admin-tab-btn {
-            flex: 0 0 auto;
-            font-size: 0.78rem !important;
-            padding: 6px 12px !important;
-        }
-        
-        }
-        .header-logo-group {
-            width: 80% !important; /* Deja espacio libre a la derecha para los iconos */
-            justify-content: flex-start;
-        }
-        .logo {
-            font-size: 0.82rem !important; /* Reduce un poco el tamaño para que no se desborde */
-            white-space: normal !important; /* Permite que se acomode si es necesario */
-            line-height: 1.2;
-        }
-        .header-search-wrapper {
-            max-width: 100% !important;
-            width: 100%;
-            order: 3;
-        }
-        .nav-menu {
-            order: 2;
-        }
-        .nav-actions {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-        }
-        
-        /* --- Ajustes para el banner y el logo central --- */
-        body {
-            padding-top: 145px;
-        }
-        .hero {
-            padding-top: 50px !important;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+
+        /* --- Tamaño del logo central en PC y pantallas grandes --- */
         .hero-logo {
-            margin-top: 15px !important;
-            margin-bottom: 20px !important;
-            display: inline-block;
+            width: 160px;
+            max-width: 100%;
+            height: auto;
         }
-    }
-    /* --- Tamaño del logo central en PC y pantallas grandes --- */
-    .hero-logo {
-        width: 160px; /* Puedes subir o bajar este valor si lo quieres más grande o más chico en PC */
-        max-width: 100%;
-        height: auto;
-    }
     </style>
 </head>
 <body>
@@ -1325,7 +1327,6 @@
                     }
                 });
 
-                // Si hay respuestas pendientes en preguntas del catálogo, dirigimos allá; si no, a compras
                 if (hasUnreadQuestions) {
                     navigateTo('view-user-questions');
                 } else {
@@ -2200,7 +2201,6 @@
                 paymentDetails.nombre_remitente = name;
             }
 
-            // Fallback directo por ID si no se capturó
             if (!fileInput) {
                 fileInput = document.getElementById(`pay-${activePayMethod}-img`);
             }
@@ -2212,26 +2212,19 @@
                 const file = fileInput.files[0];
                 const filePath = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
 
-                console.log("Iniciando subida de archivo:", file.name);
-
                 const { data: uploadData, error: uploadError } = await supabaseClient.storage
                     .from('chat-envios')
                     .upload(filePath, file);
 
                 if (uploadError) {
-                    console.error("Error detallado de Storage:", uploadError);
                     showToast("Error de Subida", uploadError.message);
                 } else {
-                    console.log("Archivo subido con éxito:", uploadData);
                     const { data: urlData } = supabaseClient.storage
                         .from('chat-envios')
                         .getPublicUrl(filePath);
                     
                     uploadedCaptureUrl = urlData.publicUrl;
-                    console.log("URL Pública generada:", uploadedCaptureUrl);
                 }
-            } else {
-                console.log("No se detectó ningún archivo seleccionado en el input.");
             }
 
             try {
@@ -2273,14 +2266,11 @@
                         navigateTo('view-my-purchases');
                         await loadDataFromSupabase();
                         return;
-                    } else {
-                        console.error("Error al actualizar la venta en la BD:", error);
                     }
                 }
-            } catch (err) {
-                console.error("Excepción en submitCheckoutPayment:", err);
-            }
+            } catch (err) {}
         }
+
         /* -------------------------------------------------------------
            7. PANEL ADMIN Y GESTIÓN DE PAGOS Y CHAT DE MENSAJES
         ------------------------------------------------------------- */
