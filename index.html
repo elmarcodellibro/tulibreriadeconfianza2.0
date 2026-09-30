@@ -2034,7 +2034,7 @@
                                 <option value="Romantasy">✨ Romantasy</option>
                                 <option value="Fantasía">🐉 Fantasía</option>
                                 <option value="Romance">💖 Romance</option>
-                                <option value="Juvenil (YA)">🎒 Juvenil (YA)</option>
+                                <option value="Juvenil">🎒 Juvenil</option>
                                 <option value="Ficción y Novelas">📖 Ficción y Novelas</option>
                                 <option value="Crecimiento Personal">🌱 Crecimiento Personal</option>
                                 <option value="Historia y Biografías">🏛️ Historia y Biografías</option>
@@ -2412,7 +2412,7 @@
                                         <option value="Romantasy">Romantasy</option>
                                         <option value="Fantasía">Fantasía</option>
                                         <option value="Romance">Romance</option>
-                                        <option value="Juvenil (YA)">Juvenil (YA)</option>
+                                        <option value="Juvenil">Juvenil</option>
                                         <option value="Ficción y Novelas">Ficción y Novelas</option>
                                         <option value="Crecimiento Personal">Crecimiento Personal</option>
                                         <option value="Historia y Biografías">Historia y Biografías</option>
@@ -3633,6 +3633,9 @@
             const rawDisp = String(item.disponibilidad || promoMeta.disponibilidad || 'inmediata').toLowerCase().trim();
             const disp = rawDisp === 'pedido' ? 'pedido' : 'inmediata';
 
+            let rawCat = (item.categoria || item.category || '').trim();
+            if (rawCat.toLowerCase() === 'juvenil (ya)') rawCat = 'Juvenil';
+
             return {
                 id: item.id,
                 slug: slug,
@@ -3641,8 +3644,8 @@
                 price: parseFloat(item.precio || item.price || 0),
                 stock: parseInt(item.stock || 0),
                 desc: rawDesc,
-                categoria: item.categoria || item.category || '',
-                category: item.categoria || item.category || '',
+                categoria: rawCat,
+                category: rawCat,
                 disponibilidad: disp,
                 destacado: item.destacado === true || item.destacado === 'true' || item.destacado === 1,
                 envio_gratis: freeShipping,
@@ -4780,7 +4783,7 @@
             "Romantasy",
             "Fantasía",
             "Romance",
-            "Juvenil (YA)",
+            "Juvenil",
             "Ficción y Novelas",
             "Crecimiento Personal",
             "Historia y Biografías",
@@ -4799,6 +4802,7 @@
                 'Romantasy': '✨',
                 'Fantasía': '🐉',
                 'Romance': '💖',
+                'Juvenil': '🎒',
                 'Juvenil (YA)': '🎒',
                 'Ficción y Novelas': '📖',
                 'Crecimiento Personal': '🌱',
@@ -7066,7 +7070,7 @@
             const customInput = document.getElementById('prod-category-custom');
 
             const standardCategories = [
-                "Romantasy", "Fantasía", "Romance", "Juvenil (YA)",
+                "Romantasy", "Fantasía", "Romance", "Juvenil",
                 "Ficción y Novelas", "Crecimiento Personal",
                 "Historia y Biografías", "Clásicos", "Ediciones Especiales", "Poesía y Ensayo"
             ];
