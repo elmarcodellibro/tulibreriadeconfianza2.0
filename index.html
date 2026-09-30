@@ -1067,7 +1067,7 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.85);
-            z-index: 20000;
+            z-index: 60000;
             align-items: center;
             justify-content: center;
             backdrop-filter: blur(4px);
@@ -5023,14 +5023,13 @@
                             <div style="position: absolute; top: 8px; left: 8px; z-index: 2; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; pointer-events: none;">
                                 ${hasDiscount ? `<span style="background: linear-gradient(135deg, #EF4444, #DC2626); color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(220,38,38,0.3); display: inline-flex; align-items: center; gap: 3px;"><i class="fas fa-tag"></i> -${discountPct}%</span>` : ''}
                                 ${isFreeShipping ? `<span style="background: linear-gradient(135deg, #10B981, #059669); color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(5,150,105,0.3); display: inline-flex; align-items: center; gap: 3px;"><i class="fas fa-truck-fast"></i> Envío Gratis</span>` : ''}
-                                ${isBajoPedido ? `<span style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; border: 1px solid #f59e0b; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,0.12); display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-hourglass-half"></i> ⏳ Bajo Pedido</span>` : ''}
+                                ${isBajoPedido ? `<span style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; border: 1px solid #f59e0b; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,0.12); display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-hourglass-half"></i> Bajo Pedido</span>` : ''}
                             </div>
                             <img src="${prod.image}" class="product-img" style="cursor:pointer;" onclick="event.stopPropagation(); openLightbox(${JSON.stringify(Array.isArray(prod.images) && prod.images.length > 0 ? prod.images : [prod.image])}, 0)">
                         </div>
                         <div class="product-body">
                             <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 5px;">
                                 ${bookCategory ? `<span style="display:inline-block; font-size:0.68rem; background:rgba(212, 175, 55, 0.12); color:var(--primary); padding:2px 8px; border-radius:10px; font-weight:700; border:1px solid rgba(212, 175, 55, 0.3); width:fit-content;"><i class="fas fa-bookmark" style="font-size:0.6rem; color:var(--gold);"></i> ${bookCategory}</span>` : ''}
-                                ${isBajoPedido ? `<span style="display:inline-block; font-size:0.65rem; background:#fffbeb; color:#b45309; padding:2px 8px; border-radius:10px; font-weight:700; border:1px solid #fde68a; width:fit-content;">⏳ Bajo Pedido (30 días)</span>` : ''}
                             </div>
                             <h3 class="product-title" title="${prod.title}">${cleanTitle}</h3>
                             <div class="product-author">${prod.author}</div>
@@ -5052,16 +5051,17 @@
 
             if (shopContainer) shopContainer.innerHTML = itemsToRender.map(cardHTML).join('');
 
-            // Sección Los Más Leídos (Inicio): hasta 10 libros destacados, rellenando con más recientes si faltan
+            // Sección Los Más Leídos (Inicio): hasta 10 libros destacados, rellenando con más recientes si faltan (excluyendo bajo pedido)
             const best = document.getElementById('bestsellers-container');
             if (best && Array.isArray(products)) {
-                const featuredBooks = products.filter(p => p.destacado === true);
+                const featuredBooks = products.filter(p => p.destacado === true && (p.disponibilidad || '').toLowerCase() !== 'pedido');
                 let bestsellersList = [...featuredBooks.slice(0, 10)];
 
                 if (bestsellersList.length < 10) {
                     const existingIds = new Set(bestsellersList.map(p => p.id));
                     for (const p of products) {
-                        if (!existingIds.has(p.id)) {
+                        const isPedido = (p.disponibilidad || '').toLowerCase() === 'pedido';
+                        if (!isPedido && !existingIds.has(p.id)) {
                             bestsellersList.push(p);
                             existingIds.add(p.id);
                             if (bestsellersList.length >= 10) break;
@@ -7611,14 +7611,13 @@
                             <div style="position: absolute; top: 8px; left: 8px; z-index: 2; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; pointer-events: none;">
                                 ${hasDiscount ? `<span style="background: linear-gradient(135deg, #EF4444, #DC2626); color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(220,38,38,0.3); display: inline-flex; align-items: center; gap: 3px;"><i class="fas fa-tag"></i> -${discountPct}%</span>` : ''}
                                 ${isFreeShipping ? `<span style="background: linear-gradient(135deg, #10B981, #059669); color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(5,150,105,0.3); display: inline-flex; align-items: center; gap: 3px;"><i class="fas fa-truck-fast"></i> Envío Gratis</span>` : ''}
-                                ${isBajoPedido ? `<span style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; border: 1px solid #f59e0b; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,0.12); display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-hourglass-half"></i> ⏳ Bajo Pedido</span>` : ''}
+                                ${isBajoPedido ? `<span style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; border: 1px solid #f59e0b; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,0.12); display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-hourglass-half"></i> Bajo Pedido</span>` : ''}
                             </div>
                             <img src="${prod.image}" class="product-img" style="cursor:pointer;" onclick="event.stopPropagation(); openLightbox(${JSON.stringify(Array.isArray(prod.images) && prod.images.length > 0 ? prod.images : [prod.image])}, 0)">
                         </div>
                         <div class="product-body">
                             <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 5px;">
                                 ${bookCategory ? `<span style="display:inline-block; font-size:0.68rem; background:rgba(212, 175, 55, 0.12); color:var(--primary); padding:2px 8px; border-radius:10px; font-weight:700; border:1px solid rgba(212, 175, 55, 0.3); width:fit-content;"><i class="fas fa-bookmark" style="font-size:0.6rem; color:var(--gold);"></i> ${bookCategory}</span>` : ''}
-                                ${isBajoPedido ? `<span style="display:inline-block; font-size:0.65rem; background:#fffbeb; color:#b45309; padding:2px 8px; border-radius:10px; font-weight:700; border:1px solid #fde68a; width:fit-content;">⏳ Bajo Pedido (30 días)</span>` : ''}
                             </div>
                             <h3 class="product-title" title="${prod.title}">${cleanTitle}</h3>
                             <div class="product-author">${prod.author}</div>
@@ -7755,7 +7754,7 @@
 
     <!-- Modal Visor de Imágenes -->
     <div id="image-modal"
-        style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); align-items:center; justify-content:center;">
+        style="display:none; position:fixed; z-index:60000; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); align-items:center; justify-content:center;">
         <button onclick="closeImageModal()"
             style="position:absolute; top:20px; right:30px; background:none; border:none; color:white; font-size:35px; cursor:pointer;">&times;</button>
         <button onclick="prevModalImage()"
