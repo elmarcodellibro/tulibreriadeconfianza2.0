@@ -5090,7 +5090,6 @@
                         <div class="product-img-wrapper">
                             <div style="position: absolute; top: 8px; left: 8px; z-index: 2; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; pointer-events: none;">
                                 ${hasDiscount ? `<span style="background: linear-gradient(135deg, #EF4444, #DC2626); color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(220,38,38,0.3); display: inline-flex; align-items: center; gap: 3px;"><i class="fas fa-tag"></i> -${discountPct}%</span>` : ''}
-                                ${isFreeShipping ? `<span style="background: linear-gradient(135deg, #10B981, #059669); color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(5,150,105,0.3); display: inline-flex; align-items: center; gap: 3px;"><i class="fas fa-truck-fast"></i> Envío Gratis</span>` : ''}
                                 ${isBajoPedido ? `<span style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; border: 1px solid #f59e0b; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,0.12); display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-hourglass-half"></i> Bajo Pedido</span>` : ''}
                             </div>
                             <img src="${prod.image}" class="product-img" style="cursor:pointer;" onclick="event.stopPropagation(); openLightbox(${JSON.stringify(Array.isArray(prod.images) && prod.images.length > 0 ? prod.images : [prod.image])}, 0)">
@@ -5109,6 +5108,7 @@
                                         ${hasDiscount ? `<span class="old-price" style="text-decoration: line-through; color: #94a3b8; font-size: 0.8rem; font-weight: 500;">$${Number(prod.precio_anterior).toFixed(2)}</span>` : ''}
                                     </div>
                                     <small class="product-price-bs">Bs. ${calculateBs(prod.price)}</small>
+                                    ${isFreeShipping ? `<span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.66rem; font-weight: 700; color: #047857; background: #ecfdf5; padding: 2px 6px; border-radius: 4px; border: 1px solid #a7f3d0; margin-top: 3px; width: fit-content;"><i class="fas fa-truck-fast"></i> Envío gratis</span>` : ''}
                                 </div>
                                 <a href="#libro/${prodSlug}" class="btn" style="padding: 6px 12px; font-size: 0.75rem; text-decoration: none; display: inline-flex; align-items: center;" onclick="event.stopPropagation(); showProductDetail('${prodSlug}')">Ver Detalle</a>
                             </div>
@@ -7678,7 +7678,6 @@
                         <div class="product-img-wrapper">
                             <div style="position: absolute; top: 8px; left: 8px; z-index: 2; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; pointer-events: none;">
                                 ${hasDiscount ? `<span style="background: linear-gradient(135deg, #EF4444, #DC2626); color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(220,38,38,0.3); display: inline-flex; align-items: center; gap: 3px;"><i class="fas fa-tag"></i> -${discountPct}%</span>` : ''}
-                                ${isFreeShipping ? `<span style="background: linear-gradient(135deg, #10B981, #059669); color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(5,150,105,0.3); display: inline-flex; align-items: center; gap: 3px;"><i class="fas fa-truck-fast"></i> Envío Gratis</span>` : ''}
                                 ${isBajoPedido ? `<span style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; border: 1px solid #f59e0b; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,0.12); display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-hourglass-half"></i> Bajo Pedido</span>` : ''}
                             </div>
                             <img src="${prod.image}" class="product-img" style="cursor:pointer;" onclick="event.stopPropagation(); openLightbox(${JSON.stringify(Array.isArray(prod.images) && prod.images.length > 0 ? prod.images : [prod.image])}, 0)">
@@ -7697,6 +7696,7 @@
                                         ${hasDiscount ? `<span class="old-price" style="text-decoration: line-through; color: #94a3b8; font-size: 0.8rem; font-weight: 500;">$${Number(prod.precio_anterior).toFixed(2)}</span>` : ''}
                                     </div>
                                     <small class="product-price-bs">Bs. ${calculateBs(prod.price)}</small>
+                                    ${isFreeShipping ? `<span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.66rem; font-weight: 700; color: #047857; background: #ecfdf5; padding: 2px 6px; border-radius: 4px; border: 1px solid #a7f3d0; margin-top: 3px; width: fit-content;"><i class="fas fa-truck-fast"></i> Envío gratis</span>` : ''}
                                 </div>
                                 <a href="#libro/${prodSlug}" class="btn" style="padding: 6px 12px; font-size: 0.75rem; text-decoration: none; display: inline-flex; align-items: center;" onclick="event.stopPropagation(); showProductDetail('${prodSlug}')">Ver Detalle</a>
                             </div>
