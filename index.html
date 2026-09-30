@@ -5139,9 +5139,10 @@
             }
 
             // Envío Gratis en Detalle
+            const isFreeShipping = Boolean(prod.envio_gratis === true || prod.envio_gratis === 'true' || prod.envio_gratis === 1 || prod.envio_gratis === '1');
             const freeShippingBadgeEl = document.getElementById('detail-free-shipping-badge');
             const freeShippingBoxEl = document.getElementById('detail-free-shipping-box');
-            if (prod.envio_gratis === true) {
+            if (isFreeShipping) {
                 if (freeShippingBadgeEl) freeShippingBadgeEl.style.display = 'inline-flex';
                 if (freeShippingBoxEl) freeShippingBoxEl.style.display = 'flex';
             } else {
@@ -5173,7 +5174,7 @@
                 `).join('');
             }
 
-            const isBajoPedido = (prod.disponibilidad === 'pedido');
+            const isBajoPedido = String(prod.disponibilidad || '').toLowerCase() === 'pedido';
             const availBadge = document.getElementById('detail-availability-badge');
             const statusTag = document.getElementById('detail-stock-status-tag');
             if (availBadge) {
