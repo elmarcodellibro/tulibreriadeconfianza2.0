@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El Marco Del Libro | Tu Librería Digital</title>
+    <title>El Marco Del Libro | Tu Librería de Confianza</title>
 
     <!-- Logo en la Pestaña (Favicon) -->
     <link rel="icon" type="image/jpeg" href="https://i.ibb.co/fzLdHtMW/elmarcodellibro.jpg">
@@ -859,28 +859,55 @@
             transform: scale(1.03);
         }
 
-        .fav-heart-btn {
+        .fav-heart-btn,
+        .card-share-btn {
             position: absolute;
             top: 6px;
-            right: 6px;
             width: 28px;
             height: 28px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #ccc;
             cursor: pointer;
             border: none;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             z-index: 10;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
             transition: var(--transition);
         }
 
+        .fav-heart-btn {
+            right: 6px;
+            color: #94a3b8;
+        }
+
+        .fav-heart-btn:hover {
+            color: #EF4444;
+            transform: scale(1.1);
+        }
+
         .fav-heart-btn.active {
             color: #EF4444;
+        }
+
+        .card-share-btn {
+            right: 38px;
+            color: var(--primary);
+        }
+
+        .card-share-btn:hover {
+            color: var(--gold);
+            transform: scale(1.1);
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+        }
+
+        .card-share-btn:active {
+            transform: scale(0.95);
         }
 
         .product-body {
@@ -1772,12 +1799,20 @@
                 font-size: 0.68rem !important;
             }
 
-            .fav-heart-btn {
+            .fav-heart-btn,
+            .card-share-btn {
                 width: 26px !important;
                 height: 26px !important;
-                font-size: 0.75rem !important;
+                font-size: 0.72rem !important;
                 top: 4px !important;
+            }
+
+            .fav-heart-btn {
                 right: 4px !important;
+            }
+
+            .card-share-btn {
+                right: 34px !important;
             }
 
             .pwa-install-banner {
@@ -2362,6 +2397,10 @@
                         style="display: flex; gap: 10px; align-items: center; border-top: 1px solid #eee; padding-top: 15px;">
                         <button id="btn-add-to-cart" class="btn" style="flex-grow: 1; padding: 10px; font-size: 0.9rem;"
                             onclick="addToCart()"><i class="fas fa-book-medical"></i> Añadir a la Lectura</button>
+                        <button class="btn"
+                            style="background: #fff; color: var(--primary); border-color: #cbd5e1; padding: 10px 14px;"
+                            onclick="if(currentSelectedProduct) shareBook(getBookSlug(currentSelectedProduct), currentSelectedProduct.title, event)"
+                            title="Compartir enlace"><i class="fas fa-share-nodes" style="font-size: 1rem;"></i></button>
                         <button class="btn"
                             style="background: #fff; color: #EF4444; border-color: #EF4444; padding: 10px 14px;"
                             onclick="if(currentSelectedProduct) toggleFavorite(currentSelectedProduct.id, event)"
@@ -3563,8 +3602,7 @@
                             DEL LIBRO</h3>
                     </div>
                     <p>
-                        Librería digital especializada en Venezuela. Literatura juvenil, Romantasy, novedades
-                        editoriales y clásicos, con entrega inmediata y libros bajo pedido garantizado.
+                        Librería Online especializada en Venezuela. Literatura juvenil, Crecimiento personal, novedades editoriales y clásicos, con entrega inmediata y libros bajo pedido garantizado. Somos tu librería de confianza.
                     </p>
                     <div class="social-links">
                         <a href="https://www.instagram.com/elmarcodellibro?igsh=MWZ2dnE1emswYWY2OQ==" target="_blank"
@@ -5212,6 +5250,35 @@
             }
         }
 
+        async function shareBook(prodSlug, bookTitle, event) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            const baseUrl = window.location.href.split('#')[0].split('?')[0].replace(/\/+$/, '');
+            const shareUrl = `${baseUrl}/#libro/${prodSlug}`;
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(shareUrl);
+                } else {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = shareUrl;
+                    textArea.style.position = "fixed";
+                    textArea.style.left = "-999999px";
+                    textArea.style.top = "-999999px";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                }
+                showToast("¡Enlace Copiado!", `El enlace directo para "${bookTitle || 'este libro'}" se copió al portapapeles.`);
+            } catch (err) {
+                prompt("Copia el siguiente enlace para compartir:", shareUrl);
+            }
+        }
+
         function calculateAverageRating(bookId) {
             const bookReviews = reviewsList.filter(r => r.libro_id == bookId);
             if (bookReviews.length === 0) return 5;
@@ -5243,7 +5310,8 @@
                 return `
                     <div class="product-card" onclick="showProductDetail('${prodSlug}')">
                         <script type="application/ld+json">${schemaJson}<\/script>
-                        <button class="fav-heart-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite(${prod.id}, event)"><i class="${isFav ? 'fas' : 'far'} fa-heart"></i></button>
+                        <button class="card-share-btn" onclick="shareBook('${prodSlug}', '${cleanTitle.replace(/'/g, "\\'")}', event)" title="Compartir libro"><i class="fas fa-share-nodes"></i></button>
+                        <button class="fav-heart-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite(${prod.id}, event)" title="${isFav ? 'Quitar de favoritos' : 'Añadir a favoritos'}"><i class="${isFav ? 'fas' : 'far'} fa-heart"></i></button>
                         <div class="product-img-wrapper">
                             <div style="position: absolute; top: 8px; left: 8px; z-index: 2; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; pointer-events: none;">
                                 ${hasDiscount ? `<span style="background: linear-gradient(135deg, #EF4444, #DC2626); color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(220,38,38,0.3); display: inline-flex; align-items: center; gap: 3px;"><i class="fas fa-tag"></i> -${discountPct}%</span>` : ''}
@@ -7914,7 +7982,8 @@
                 return `
                     <div class="product-card" onclick="showProductDetail('${prodSlug}')">
                         <script type="application/ld+json">${schemaJson}<\/script>
-                        <button class="fav-heart-btn active" onclick="toggleFavorite(${prod.id}, event)"><i class="fas fa-heart"></i></button>
+                        <button class="card-share-btn" onclick="shareBook('${prodSlug}', '${cleanTitle.replace(/'/g, "\\'")}', event)" title="Compartir libro"><i class="fas fa-share-nodes"></i></button>
+                        <button class="fav-heart-btn active" onclick="toggleFavorite(${prod.id}, event)" title="Quitar de favoritos"><i class="fas fa-heart"></i></button>
                         <div class="product-img-wrapper">
                             <div style="position: absolute; top: 8px; left: 8px; z-index: 2; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; pointer-events: none;">
                                 ${hasDiscount ? `<span style="background: linear-gradient(135deg, #EF4444, #DC2626); color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(220,38,38,0.3); display: inline-flex; align-items: center; gap: 3px;"><i class="fas fa-tag"></i> -${discountPct}%</span>` : ''}
