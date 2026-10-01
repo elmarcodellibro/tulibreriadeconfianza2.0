@@ -859,10 +859,19 @@
             transform: scale(1.03);
         }
 
-        .fav-heart-btn,
-        .card-share-btn {
+        .card-action-column {
             position: absolute;
             top: 6px;
+            right: 6px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .fav-heart-btn,
+        .card-share-btn {
             width: 28px;
             height: 28px;
             border-radius: 50%;
@@ -881,7 +890,6 @@
         }
 
         .fav-heart-btn {
-            right: 6px;
             color: #94a3b8;
         }
 
@@ -895,7 +903,6 @@
         }
 
         .card-share-btn {
-            right: 38px;
             color: var(--primary);
         }
 
@@ -908,6 +915,19 @@
 
         .card-share-btn:active {
             transform: scale(0.95);
+        }
+
+        /* Fallback si se renderizan directamente sin card-action-column */
+        .product-card > .fav-heart-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+        }
+
+        .product-card > .card-share-btn {
+            position: absolute;
+            top: 38px;
+            right: 6px;
         }
 
         .product-body {
@@ -1799,20 +1819,27 @@
                 font-size: 0.68rem !important;
             }
 
+            .card-action-column {
+                top: 4px !important;
+                right: 4px !important;
+                gap: 5px !important;
+            }
+
             .fav-heart-btn,
             .card-share-btn {
                 width: 26px !important;
                 height: 26px !important;
                 font-size: 0.72rem !important;
-                top: 4px !important;
             }
 
-            .fav-heart-btn {
+            .product-card > .fav-heart-btn {
+                top: 4px !important;
                 right: 4px !important;
             }
 
-            .card-share-btn {
-                right: 34px !important;
+            .product-card > .card-share-btn {
+                top: 34px !important;
+                right: 4px !important;
             }
 
             .pwa-install-banner {
@@ -5310,8 +5337,10 @@
                 return `
                     <div class="product-card" onclick="showProductDetail('${prodSlug}')">
                         <script type="application/ld+json">${schemaJson}<\/script>
-                        <button class="card-share-btn" onclick="shareBook('${prodSlug}', '${cleanTitle.replace(/'/g, "\\'")}', event)" title="Compartir libro"><i class="fas fa-share-nodes"></i></button>
-                        <button class="fav-heart-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite(${prod.id}, event)" title="${isFav ? 'Quitar de favoritos' : 'Añadir a favoritos'}"><i class="${isFav ? 'fas' : 'far'} fa-heart"></i></button>
+                        <div class="card-action-column">
+                            <button class="fav-heart-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite(${prod.id}, event)" title="${isFav ? 'Quitar de favoritos' : 'Añadir a favoritos'}"><i class="${isFav ? 'fas' : 'far'} fa-heart"></i></button>
+                            <button class="card-share-btn" onclick="shareBook('${prodSlug}', '${cleanTitle.replace(/'/g, "\\'")}', event)" title="Compartir libro"><i class="fas fa-share-nodes"></i></button>
+                        </div>
                         <div class="product-img-wrapper">
                             <div style="position: absolute; top: 8px; left: 8px; z-index: 2; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; pointer-events: none;">
                                 ${hasDiscount ? `<span style="background: linear-gradient(135deg, #EF4444, #DC2626); color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(220,38,38,0.3); display: inline-flex; align-items: center; gap: 3px;"><i class="fas fa-tag"></i> -${discountPct}%</span>` : ''}
@@ -7982,8 +8011,10 @@
                 return `
                     <div class="product-card" onclick="showProductDetail('${prodSlug}')">
                         <script type="application/ld+json">${schemaJson}<\/script>
-                        <button class="card-share-btn" onclick="shareBook('${prodSlug}', '${cleanTitle.replace(/'/g, "\\'")}', event)" title="Compartir libro"><i class="fas fa-share-nodes"></i></button>
-                        <button class="fav-heart-btn active" onclick="toggleFavorite(${prod.id}, event)" title="Quitar de favoritos"><i class="fas fa-heart"></i></button>
+                        <div class="card-action-column">
+                            <button class="fav-heart-btn active" onclick="toggleFavorite(${prod.id}, event)" title="Quitar de favoritos"><i class="fas fa-heart"></i></button>
+                            <button class="card-share-btn" onclick="shareBook('${prodSlug}', '${cleanTitle.replace(/'/g, "\\'")}', event)" title="Compartir libro"><i class="fas fa-share-nodes"></i></button>
+                        </div>
                         <div class="product-img-wrapper">
                             <div style="position: absolute; top: 8px; left: 8px; z-index: 2; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; pointer-events: none;">
                                 ${hasDiscount ? `<span style="background: linear-gradient(135deg, #EF4444, #DC2626); color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; box-shadow: 0 2px 6px rgba(220,38,38,0.3); display: inline-flex; align-items: center; gap: 3px;"><i class="fas fa-tag"></i> -${discountPct}%</span>` : ''}
