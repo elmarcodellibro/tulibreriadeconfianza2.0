@@ -15,10 +15,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="El Marco del Libro">
-    <meta name="application-name" content="El Marco del Libro">
     <link rel="apple-touch-icon" href="https://i.ibb.co/fzLdHtMW/elmarcodellibro.jpg">
-    <link rel="apple-touch-icon" sizes="192x192" href="https://i.ibb.co/fzLdHtMW/elmarcodellibro.jpg">
-    <link rel="apple-touch-icon" sizes="512x512" href="https://i.ibb.co/fzLdHtMW/elmarcodellibro.jpg">
 
     <!-- Manifiesto PWA oficial con start_url raíz para instalación limpia -->
     <link rel="manifest" href="./manifest.json">
@@ -2146,9 +2143,6 @@
                                     style="color:#EF4444;"></i> Favoritos</a>
                             <a id="install-app-btn" style="display: none;" onclick="installPwaApp()"><i
                                     class="fas fa-download" style="color:var(--gold);"></i> Instalar App</a>
-                            <a id="push-notif-btn" onclick="requestAndSubscribePush(true)"><i
-                                    class="fas fa-bell" style="color:var(--gold);"></i> <span
-                                    id="push-notif-btn-text">Activar Notificaciones</span></a>
                             <a id="admin-panel-link"
                                 style="display: none; background: #fff8e1; font-weight: bold; color: var(--primary);"
                                 onclick="navigateTo('view-admin-dashboard'); switchAdminTab('inventory');"><i
@@ -4825,9 +4819,6 @@
                 displayNameEl.innerText = 'Cuenta';
                 adminLink.style.display = 'none';
             }
-            if (typeof updatePushNotificationUI === 'function') {
-                updatePushNotificationUI();
-            }
         }
 
         function handleUserMenuClick() {
@@ -4869,9 +4860,6 @@
                 };
                 localStorage.setItem('marcodellibro_user_session', JSON.stringify(currentUser));
                 updateUIState();
-                if (typeof syncPushSubscriptionWithSupabase === 'function') {
-                    syncPushSubscriptionWithSupabase(false);
-                }
                 showToast("🔐 Acceso Vendedor", "Has ingresado al Panel Administrativo.");
                 navigateTo('view-home');
                 return;
@@ -4902,9 +4890,6 @@
             localStorage.setItem('marcodellibro_user_session', JSON.stringify(currentUser));
             updateUIState();
             await loadUserFavorites();
-            if (typeof syncPushSubscriptionWithSupabase === 'function') {
-                syncPushSubscriptionWithSupabase(false);
-            }
 
             showToast("¡Bienvenido de nuevo!", `Hola ${currentUser.name.split(' ')[0]}.`);
             navigateTo('view-home');
@@ -4965,9 +4950,6 @@
                 await loadDataFromSupabase();
                 localStorage.setItem('marcodellibro_user_session', JSON.stringify(currentUser));
                 updateUIState();
-                if (typeof syncPushSubscriptionWithSupabase === 'function') {
-                    syncPushSubscriptionWithSupabase(false);
-                }
 
                 showToast("¡Registro Exitoso!", `Bienvenido/a ${name.split(' ')[0]}. Por favor completa tu perfil.`);
                 navigateTo('view-profile');
@@ -8299,160 +8281,11 @@
         }
 
         /* -------------------------------------------------------------
-           SISTEMA DE NOTIFICACIONES WEB PUSH Y SERVICE WORKER (PWA)
-        ------------------------------------------------------------- */
-        const VAPID_PUBLIC_KEY = 'BMNKkHkGjJeepWREQWF9oAqZPbDitt-OfR-uYZABDY8lKvP40QCzzEwNPKoIZlQL40eBfXcOi-2SHHbtsIMjSNg';
-
-        // Convertir clave pública VAPID en formato Uint8Array para pushManager
-        function urlBase64ToUint8Array(base64String) {
-            const padding = '='.repeat((4 - base64String.length % 4) % 4);
-            const base64 = (base64String + padding)
-                .replace(/\-/g, '+')
-                .replace(/_/g, '/');
-            const rawData = window.atob(base64);
-            const outputArray = new Uint8Array(rawData.length);
-            for (let i = 0; i < rawData.length; ++i) {
-                outputArray[i] = rawData.charCodeAt(i);
-            }
-            return outputArray;
-        }
-
-        // Solicitar permisos de notificación nativa y suscribir al usuario
-        async function requestAndSubscribePush(interactive = false) {
-            if (typeof window === 'undefined' || !('serviceWorker' in navigator) || !('PushManager' in window)) {
-                if (interactive) {
-                    showToast("No Compatible", "Tu navegador actual no admite notificaciones Web Push.");
-                }
-                return null;
-            }
-
-            try {
-                const currentPerm = Notification.permission;
-                if (currentPerm === 'denied' && interactive) {
-                    showToast("Permiso Bloqueado", "Las notificaciones están bloqueadas en la configuración de tu navegador. Actívalas manualmente en el candado de la URL.");
-                    return null;
-                }
-
-                const permission = await Notification.requestPermission();
-                if (permission !== 'granted') {
-                    if (interactive) {
-                        showToast("Notificaciones Inactivas", "No se otorgaron permisos para recibir notificaciones.");
-                    }
-                    updatePushNotificationUI();
-                    return null;
-                }
-
-                const registration = await navigator.serviceWorker.ready;
-                let subscription = await registration.pushManager.getSubscription();
-
-                if (!subscription) {
-                    const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
-                    subscription = await registration.pushManager.subscribe({
-                        userVisibleOnly: true,
-                        applicationServerKey: convertedVapidKey
-                    });
-                }
-
-                // Guardar la suscripción resultante en Supabase
-                await savePushSubscriptionToSupabase(subscription);
-
-                if (interactive) {
-                    showToast("🔔 Notificaciones Activas", "Recibirás avisos de tus pedidos y novedades directamente en tu dispositivo.");
-                }
-
-                updatePushNotificationUI();
-                return subscription;
-            } catch (err) {
-                console.error("Error al suscribir notificaciones push:", err);
-                if (interactive) {
-                    showToast("Error", "No se pudo activar las notificaciones push en este momento.");
-                }
-                return null;
-            }
-        }
-
-        // Guardar o actualizar la suscripción push en la tabla suscripciones_push de Supabase
-        async function savePushSubscriptionToSupabase(subscription) {
-            if (!subscription || !supabaseClient) return;
-
-            try {
-                const rawKey = subscription.getKey ? subscription.getKey('p256dh') : null;
-                const p256dh = rawKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(rawKey))) : '';
-                const rawAuth = subscription.getKey ? subscription.getKey('auth') : null;
-                const auth = rawAuth ? btoa(String.fromCharCode.apply(null, new Uint8Array(rawAuth))) : '';
-
-                const userEmail = (currentUser && currentUser.email)
-                    ? currentUser.email.toLowerCase().trim()
-                    : 'visitante@elmarcodellibro.com';
-
-                // Verificar si ya existe este endpoint para actualizar o insertar
-                const { data: existing, error: checkError } = await supabaseClient
-                    .from('suscripciones_push')
-                    .select('id')
-                    .eq('endpoint', subscription.endpoint);
-
-                if (!checkError && existing && existing.length > 0) {
-                    await supabaseClient
-                        .from('suscripciones_push')
-                        .update({
-                            email: userEmail,
-                            p256dh: p256dh,
-                            auth: auth,
-                            fecha: new Date().toISOString()
-                        })
-                        .eq('endpoint', subscription.endpoint);
-                } else {
-                    await supabaseClient
-                        .from('suscripciones_push')
-                        .insert([{
-                            email: userEmail,
-                            endpoint: subscription.endpoint,
-                            p256dh: p256dh,
-                            auth: auth,
-                            fecha: new Date().toISOString()
-                        }]);
-                }
-                console.log("Suscripción push registrada en Supabase para:", userEmail);
-            } catch (e) {
-                console.warn("Fallo guardando suscripción push en Supabase:", e);
-            }
-        }
-
-        // Sincronizar suscripción existente si ya hay permisos concedidos
-        async function syncPushSubscriptionWithSupabase(interactive = false) {
-            if (typeof navigator === 'undefined' || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
-            try {
-                if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-                    const registration = await navigator.serviceWorker.ready;
-                    const subscription = await registration.pushManager.getSubscription();
-                    if (subscription) {
-                        await savePushSubscriptionToSupabase(subscription);
-                    } else if (interactive) {
-                        await requestAndSubscribePush(true);
-                    }
-                } else if (interactive) {
-                    await requestAndSubscribePush(true);
-                }
-                updatePushNotificationUI();
-            } catch (e) { }
-        }
-
-        function updatePushNotificationUI() {
-            const btnText = document.getElementById('push-notif-btn-text');
-            if (!btnText) return;
-            if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-                btnText.innerHTML = 'Notificaciones Activas <i class="fas fa-check" style="color:var(--success); margin-left:4px;"></i>';
-            } else {
-                btnText.innerText = 'Activar Notificaciones';
-            }
-        }
-
-        /* -------------------------------------------------------------
            SISTEMA PWA (APP MÓVIL INSTALABLE Y MANIFIESTO SPLASH SCREEN)
         ------------------------------------------------------------- */
         let deferredPwaPrompt = null;
         const PWA_DISMISS_STORAGE_KEY = 'marcodellibro_pwa_dismissed';
-        const PWA_DISMISS_DURATION_MS = 24 * 60 * 60 * 1000; // 24 horas tras descarte
+        const PWA_DISMISS_DURATION_MS = 3 * 24 * 60 * 60 * 1000; // 3 días tras descarte sutil
 
         function isAppRunningStandalone() {
             if (typeof window === 'undefined') return false;
@@ -8460,16 +8293,6 @@
             const navStandalone = typeof navigator !== 'undefined' && (navigator.standalone === true);
             const referrerAndroid = typeof document !== 'undefined' && document.referrer && document.referrer.includes('android-app://');
             return Boolean(matchMediaStandalone || navStandalone || referrerAndroid);
-        }
-
-        function isIosDevice() {
-            if (typeof navigator === 'undefined') return false;
-            return /iphone|ipad|ipod/i.test(navigator.userAgent || '');
-        }
-
-        function isMobileDevice() {
-            if (typeof navigator === 'undefined') return false;
-            return /android|iphone|ipad|ipod|mobile|blackberry|iemobile|opera mini/i.test(navigator.userAgent || '') || (window.innerWidth <= 768);
         }
 
         function shouldShowPwaBanner() {
@@ -8481,26 +8304,25 @@
             return isNaN(timePassed) || timePassed > PWA_DISMISS_DURATION_MS;
         }
 
-        function showPwaInstallBannerIfEligible() {
-            if (isAppRunningStandalone()) return;
-            if (!shouldShowPwaBanner()) return;
-
-            const banner = document.getElementById('pwa-install-banner');
-            if (banner) {
-                banner.style.display = 'block';
-            }
-
-            const menuBtn = document.getElementById('install-app-btn');
-            if (menuBtn) {
-                menuBtn.style.display = 'block';
-            }
-        }
-
         if (typeof window !== 'undefined') {
             window.addEventListener('beforeinstallprompt', (e) => {
+                // Prevenir que el navegador muestre automáticamente su barra por defecto
                 e.preventDefault();
                 deferredPwaPrompt = e;
-                showPwaInstallBannerIfEligible();
+
+                // Mostrar el botón en el menú de usuario
+                const menuBtn = document.getElementById('install-app-btn');
+                if (menuBtn && !isAppRunningStandalone()) {
+                    menuBtn.style.display = 'block';
+                }
+
+                // Mostrar el banner sutil flotante solo si no ha sido descartado recientemente
+                if (shouldShowPwaBanner()) {
+                    const banner = document.getElementById('pwa-install-banner');
+                    if (banner) {
+                        banner.style.display = 'block';
+                    }
+                }
             });
         }
 
@@ -8519,35 +8341,32 @@
         }
 
         async function installPwaApp() {
-            if (deferredPwaPrompt) {
-                try {
-                    deferredPwaPrompt.prompt();
-                    const choiceResult = await deferredPwaPrompt.userChoice;
-                    if (choiceResult && choiceResult.outcome === 'accepted') {
-                        console.log('El usuario aceptó la instalación de la PWA');
-                        showToast("¡Instalando!", "El Marco del Libro se está añadiendo a tu dispositivo.");
-                    }
-                } catch (err) {
-                    console.error('Error durante el proceso de instalación:', err);
-                } finally {
-                    deferredPwaPrompt = null;
-                    const banner = document.getElementById('pwa-install-banner');
-                    if (banner) banner.style.display = 'none';
-                    const menuBtn = document.getElementById('install-app-btn');
-                    if (menuBtn) menuBtn.style.display = 'none';
+            if (!deferredPwaPrompt) {
+                if (isAppRunningStandalone()) {
+                    showToast("App Instalada", "Ya estás utilizando El Marco del Libro en su versión de aplicación.");
+                } else {
+                    showToast("Instalar App", "Para instalar, abre el menú de tu navegador y pulsa 'Agregar a la pantalla principal' o 'Instalar aplicación'.");
                 }
                 return;
             }
 
-            if (isAppRunningStandalone()) {
-                showToast("App Instalada", "Ya estás utilizando El Marco del Libro en su versión de aplicación.");
-                return;
-            }
-
-            if (isIosDevice()) {
-                showToast("Instalar en iOS", "Pulsa el botón Compartir de Safari (icono con flecha hacia arriba) y selecciona 'Añadir a la pantalla de inicio'.");
-            } else {
-                showToast("Instalar App", "Abre el menú de tu navegador (tres puntos arriba a la derecha) y selecciona 'Instalar aplicación' o 'Agregar a la pantalla principal'.");
+            try {
+                deferredPwaPrompt.prompt();
+                const choiceResult = await deferredPwaPrompt.userChoice;
+                if (choiceResult && choiceResult.outcome === 'accepted') {
+                    console.log('El usuario aceptó la instalación de la PWA');
+                    showToast("¡Instalando!", "El Marco del Libro se está añadiendo a tu dispositivo.");
+                } else {
+                    console.log('El usuario canceló la instalación de la PWA');
+                }
+            } catch (err) {
+                console.error('Error durante el proceso de instalación:', err);
+            } finally {
+                deferredPwaPrompt = null;
+                const banner = document.getElementById('pwa-install-banner');
+                if (banner) banner.style.display = 'none';
+                const menuBtn = document.getElementById('install-app-btn');
+                if (menuBtn) menuBtn.style.display = 'none';
             }
         }
 
@@ -8562,34 +8381,16 @@
                 showToast("¡App Instalada!", "Gracias por instalar El Marco del Libro en tu dispositivo.");
             });
 
-            // Registro robusto e inmediato del Service Worker (PWA y Push)
-            function registerAppServiceWorker() {
-                if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('./sw.js', { scope: './' }).then((reg) => {
-                        console.log('Service Worker registrado con éxito. Scope:', reg.scope);
-                        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-                            syncPushSubscriptionWithSupabase(false);
-                        }
+            // Registrar Service Worker para permitir instalación completa y soporte PWA
+            if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js').then((reg) => {
+                        console.log('Service Worker registrado:', reg.scope);
                     }).catch((err) => {
-                        console.warn('Error al registrar Service Worker:', err);
+                        console.log('Registro de Service Worker diferido:', err);
                     });
-                }
+                });
             }
-
-            // Ejecutar el registro inmediatamente sin depender de que 'load' ya haya pasado
-            if (document.readyState === 'complete' || document.readyState === 'interactive') {
-                registerAppServiceWorker();
-            } else {
-                window.addEventListener('DOMContentLoaded', registerAppServiceWorker);
-                window.addEventListener('load', registerAppServiceWorker);
-            }
-
-            // Mostrar el banner en dispositivos móviles tras 2.5s si no está instalado
-            setTimeout(() => {
-                if (isMobileDevice() && shouldShowPwaBanner() && !isAppRunningStandalone()) {
-                    showPwaInstallBannerIfEligible();
-                }
-            }, 2500);
         }
     </script>
 

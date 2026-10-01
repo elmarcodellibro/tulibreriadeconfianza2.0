@@ -1,42 +1,24 @@
 {
   "name": "El Marco Del Libro",
   "short_name": "El Marco del Libro",
-  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#07111E",
   "theme_color": "#07111E",
-  "orientation": "portrait-primary",
   "description": "Tu librería de confianza en Venezuela. Novedades editoriales, literatura juvenil, crecimiento personal y envíos a todo el país.",
-  "categories": [
-    "books",
-    "shopping"
-  ],
   "icons": [
     {
       "src": "https://i.ibb.co/fzLdHtMW/elmarcodellibro.jpg",
       "sizes": "192x192",
       "type": "image/jpeg",
-      "purpose": "any"
-    },
-    {
-      "src": "https://i.ibb.co/fzLdHtMW/elmarcodellibro.jpg",
-      "sizes": "192x192",
-      "type": "image/jpeg",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     },
     {
       "src": "https://i.ibb.co/fzLdHtMW/elmarcodellibro.jpg",
       "sizes": "512x512",
       "type": "image/jpeg",
-      "purpose": "any"
-    },
-    {
-      "src": "https://i.ibb.co/fzLdHtMW/elmarcodellibro.jpg",
-      "sizes": "512x512",
-      "type": "image/jpeg",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ]
 }
