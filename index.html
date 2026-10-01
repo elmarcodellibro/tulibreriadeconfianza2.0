@@ -3748,6 +3748,9 @@
         let cart = JSON.parse(localStorage.getItem('marcodellibro_store_cart')) || [];
         let userFavorites = JSON.parse(localStorage.getItem('marcodellibro_user_favs')) || [];
         let mensajesChatList = [];
+        let initializedPurchasesChatIds = new Set();
+        let initializedAdminChatIds = new Set();
+        let lastSentChatMessageOrderId = null;
 
         /* -------------------------------------------------------------
            SISTEMA DE SLUGS Y ENLACES AMIGABLES (#libro/titulo-del-libro)
@@ -4448,8 +4451,21 @@
                         return;
                     }
                 } else if (route.viewId && route.viewId !== 'view-home') {
-                    navigateTo(route.viewId, false);
-                    return;
+                    const currentActive = document.querySelector('.page-view.active-view');
+                    if (!currentActive || currentActive.id !== route.viewId) {
+                        navigateTo(route.viewId, false);
+                        return;
+                    } else {
+                        if (route.viewId === 'view-my-purchases') {
+                            renderMyPurchases({ isDataReload: true, isRealtime: true });
+                        } else if (route.viewId === 'view-admin-dashboard') {
+                            const paySec = document.getElementById('admin-section-payments');
+                            if (paySec && paySec.style.display !== 'none') {
+                                renderAdminPaymentsSection({ isDataReload: true, isRealtime: true });
+                            }
+                        }
+                        return;
+                    }
                 }
 
                 const savedView = sessionStorage.getItem('marcodellibro_last_view');
@@ -4634,13 +4650,21 @@
             if (!currentUser) return;
             const senderFilter = currentUser.isAdmin ? 'admin' : currentUser.email;
 
+            const hasUnread = mensajesChatList.some(m => m.pedido_id == orderId && m.remitente !== senderFilter && !m.leido);
+            if (!hasUnread) return;
+
+            mensajesChatList.forEach(m => {
+                if (m.pedido_id == orderId && m.remitente !== senderFilter) {
+                    m.leido = true;
+                }
+            });
+            updateBadgesUI();
+
             try {
                 await supabaseClient.from('mensajes_chat')
                     .update({ leido: true })
                     .eq('pedido_id', orderId)
                     .neq('remitente', senderFilter);
-
-                await loadDataFromSupabase();
             } catch (e) { }
         }
 
@@ -4921,6 +4945,9 @@
 
         function logoutUser() {
             currentUser = null; localStorage.removeItem('marcodellibro_user_session');
+            initializedPurchasesChatIds.clear();
+            initializedAdminChatIds.clear();
+            lastSentChatMessageOrderId = null;
             const dropdown = document.getElementById('user-dropdown-menu');
             if (dropdown) dropdown.classList.remove('show');
             updateUIState(); showToast("Sesión Cerrada", "Has salido de tu cuenta."); navigateTo('view-home');
@@ -4988,12 +5015,16 @@
            4. NAVEGACIÓN Y VISTAS
         ------------------------------------------------------------- */
         function navigateTo(viewId, updateHistory = true) {
+            const currentActive = document.querySelector('.page-view.active-view');
+            const isSwitchingView = (!currentActive || currentActive.id !== viewId);
             document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active-view'));
             const targetView = document.getElementById(viewId);
             if (targetView) targetView.classList.add('active-view');
             const dropdown = document.getElementById('user-dropdown-menu');
             if (dropdown) dropdown.classList.remove('show');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (isSwitchingView) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
 
             sessionStorage.setItem('marcodellibro_last_view', viewId);
             if (viewId !== 'view-product-detail') {
@@ -5001,7 +5032,7 @@
             }
 
             if (viewId === 'view-admin-dashboard') { renderAdminTables(); markNotificationsAsRead(); }
-            else if (viewId === 'view-my-purchases') { renderMyPurchases(); markNotificationsAsRead(); }
+            else if (viewId === 'view-my-purchases') { renderMyPurchases({ isInitialOpen: isSwitchingView }); markNotificationsAsRead(); }
             else if (viewId === 'view-user-questions') { renderUserQuestionsView(); markNotificationsAsRead(); }
             else if (viewId === 'view-user-reviews') { renderUserReviewsView(); }
             else if (viewId === 'view-profile') loadUserProfileToForm();
@@ -6216,7 +6247,7 @@
         /* -------------------------------------------------------------
            7. PANEL ADMIN Y GESTIÓN DE PAGOS Y CHAT DE MENSAJES
         ------------------------------------------------------------- */
-        function renderMyPurchases() {
+        function renderMyPurchases(options = {}) {
             const container = document.getElementById('my-purchases-container');
             if (!container || !currentUser) return;
 
@@ -6227,6 +6258,32 @@
                 container.innerHTML = '<p style="color:#888; text-align:center; padding:30px;">Aún no hay ningún pedido registrado.</p>';
                 return;
             }
+
+            // Guardar estado de scroll y texto de inputs previos antes de reescribir el contenedor
+            const prevChatStates = {};
+            const savedWindowY = window.scrollY;
+            const focusedElId = document.activeElement ? document.activeElement.id : null;
+            let cursorStart = 0;
+            let cursorEnd = 0;
+            if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+                cursorStart = document.activeElement.selectionStart;
+                cursorEnd = document.activeElement.selectionEnd;
+            }
+
+            mySales.forEach(s => {
+                const chatBox = document.getElementById(`chat-messages-${s.id}`);
+                const inputEl = document.getElementById(`order-chat-input-${s.id}`);
+                if (chatBox) {
+                    const scrollBottomDist = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight;
+                    const isNearBottom = scrollBottomDist <= 80;
+                    prevChatStates[s.id] = {
+                        scrollTop: chatBox.scrollTop,
+                        scrollHeight: chatBox.scrollHeight,
+                        isNearBottom: isNearBottom,
+                        inputValue: inputEl ? inputEl.value : ''
+                    };
+                }
+            });
 
             container.innerHTML = mySales.map(s => {
                 const itemsArray = Array.isArray(s.items) ? s.items : [];
@@ -6307,7 +6364,7 @@
                                     <span><i class="fas fa-comments" style="color:var(--gold);"></i> Chat Privado de Coordinación de Envío:</span>
                                     <span style="font-size:0.75rem; color:var(--text-light); font-weight:normal;">Mensajes directos y comprobantes</span>
                                 </div>
-                                <div id="chat-messages-${s.id}" style="background:#f9fafb; padding:15px; border-radius:10px; border:1px solid var(--border-color); margin-bottom:12px; height:240px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+                                <div id="chat-messages-${s.id}" style="background:#f9fafb; padding:15px; border-radius:10px; border:1px solid var(--border-color); margin-bottom:12px; height:240px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;" onmouseenter="markChatAsReadForOrder(${s.id})">
                                     ${orderMessages.length === 0 ? '<em style="color:#888; font-size:0.85rem; text-align:center; margin:auto;">Inicia la conversación para coordinar tu envío...</em>' :
                             orderMessages.map(m => {
                                 const isAdminMsg = m.remitente === 'admin';
@@ -6339,16 +6396,65 @@
                 `;
             }).join('');
 
+            // Restaurar textos no enviados en inputs si el usuario estaba escribiendo
+            mySales.forEach(s => {
+                const inputEl = document.getElementById(`order-chat-input-${s.id}`);
+                if (inputEl && prevChatStates[s.id] && prevChatStates[s.id].inputValue) {
+                    const wasSent = (options.forceScrollOrderId == s.id || lastSentChatMessageOrderId == s.id);
+                    if (!wasSent) {
+                        inputEl.value = prevChatStates[s.id].inputValue;
+                    }
+                }
+            });
+
+            // Restaurar foco si el usuario tenía un campo activo
+            if (focusedElId && focusedElId.startsWith('order-chat-input-')) {
+                const refocusEl = document.getElementById(focusedElId);
+                if (refocusEl) {
+                    refocusEl.focus();
+                    try {
+                        refocusEl.setSelectionRange(cursorStart, cursorEnd);
+                    } catch (e) {}
+                }
+            }
+
+            // Gestionar scroll inteligente de cada chat
             setTimeout(() => {
                 mySales.forEach(s => {
                     if (s.estado === 'Aprobado') {
                         const chatContainer = document.getElementById(`chat-messages-${s.id}`);
-                        if (chatContainer) {
+                        if (!chatContainer) return;
+
+                        const isOwnMsgSent = (options.forceScrollOrderId == s.id || lastSentChatMessageOrderId == s.id);
+                        const isFirstTime = !initializedPurchasesChatIds.has(s.id) || options.isInitialOpen;
+                        const prevState = prevChatStates[s.id];
+
+                        if (isOwnMsgSent || isFirstTime) {
                             chatContainer.scrollTop = chatContainer.scrollHeight;
+                            initializedPurchasesChatIds.add(s.id);
+                        } else if (prevState) {
+                            if (!prevState.isNearBottom) {
+                                // Preservar estrictamente posición si está navegando mensajes antiguos
+                                chatContainer.scrollTop = prevState.scrollTop;
+                            } else {
+                                // Mantener al final si ya estaba abajo
+                                chatContainer.scrollTop = chatContainer.scrollHeight;
+                            }
+                        } else {
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                            initializedPurchasesChatIds.add(s.id);
                         }
                     }
                 });
-            }, 50);
+
+                if (options.forceScrollOrderId) {
+                    lastSentChatMessageOrderId = null;
+                }
+
+                if (options.isDataReload || options.isRealtime) {
+                    window.scrollTo({ top: savedWindowY, behavior: 'instant' });
+                }
+            }, 30);
         }
 
         async function cancelPendingOrder(orderId) {
@@ -6414,7 +6520,7 @@
 
                 // 3. Recargar datos desde Supabase
                 await loadDataFromSupabase();
-                renderMyPurchases();
+                renderMyPurchases({ isDataReload: true });
                 updateBadgesUI();
 
                 // 4. Notificación de éxito
@@ -6471,13 +6577,14 @@
             if (fileInput) fileInput.value = '';
             const fileNameLbl = document.getElementById(`file-name-label-${orderId}`);
             if (fileNameLbl) fileNameLbl.innerText = '';
-
+            lastSentChatMessageOrderId = orderId;
             await loadDataFromSupabase();
             if (!currentUser.isAdmin) {
-                renderMyPurchases();
+                renderMyPurchases({ forceScrollOrderId: orderId });
             } else {
-                renderAdminPaymentsSection();
+                renderAdminPaymentsSection({ forceScrollOrderId: orderId });
             }
+            lastSentChatMessageOrderId = null;
             updateBadgesUI();
             showToast("Mensaje Enviado", "Mensaje agregado al chat.");
         }
@@ -6568,7 +6675,7 @@
             if (visSec) visSec.style.display = sec === 'visits' ? 'block' : 'none';
 
             if (sec === 'payments') {
-                renderAdminPaymentsSection();
+                renderAdminPaymentsSection({ isInitialOpen: true });
                 if (currentUser && currentUser.isAdmin) {
                     sales.filter(s => s.estado === 'Aprobado').forEach(s => {
                         markChatAsReadForOrder(s.id);
@@ -7130,10 +7237,36 @@
             `;
         }
 
-        function renderAdminPaymentsSection() {
+        function renderAdminPaymentsSection(options = {}) {
             const tbody = document.getElementById('admin-payments-table-body');
             if (!tbody) return;
             if (sales.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No hay pagos registrados.</td></tr>'; return; }
+
+            // Guardar estado de scroll y texto de inputs previos antes de reescribir la tabla
+            const prevChatStates = {};
+            const savedWindowY = window.scrollY;
+            const focusedElId = document.activeElement ? document.activeElement.id : null;
+            let cursorStart = 0;
+            let cursorEnd = 0;
+            if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+                cursorStart = document.activeElement.selectionStart;
+                cursorEnd = document.activeElement.selectionEnd;
+            }
+
+            sales.forEach(s => {
+                const chatBox = document.getElementById(`chat-messages-${s.id}`);
+                const inputEl = document.getElementById(`order-chat-input-${s.id}`);
+                if (chatBox) {
+                    const scrollBottomDist = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight;
+                    const isNearBottom = scrollBottomDist <= 80;
+                    prevChatStates[s.id] = {
+                        scrollTop: chatBox.scrollTop,
+                        scrollHeight: chatBox.scrollHeight,
+                        isNearBottom: isNearBottom,
+                        inputValue: inputEl ? inputEl.value : ''
+                    };
+                }
+            });
 
             tbody.innerHTML = sales.map(s => {
                 const isApproved = s.estado === 'Aprobado';
@@ -7208,16 +7341,65 @@
                 `;
             }).join('');
 
+            // Restaurar textos no enviados en inputs si el admin estaba escribiendo
+            sales.forEach(s => {
+                const inputEl = document.getElementById(`order-chat-input-${s.id}`);
+                if (inputEl && prevChatStates[s.id] && prevChatStates[s.id].inputValue) {
+                    const wasSent = (options.forceScrollOrderId == s.id || lastSentChatMessageOrderId == s.id);
+                    if (!wasSent) {
+                        inputEl.value = prevChatStates[s.id].inputValue;
+                    }
+                }
+            });
+
+            // Restaurar foco si el administrador tenía un campo activo
+            if (focusedElId && focusedElId.startsWith('order-chat-input-')) {
+                const refocusEl = document.getElementById(focusedElId);
+                if (refocusEl) {
+                    refocusEl.focus();
+                    try {
+                        refocusEl.setSelectionRange(cursorStart, cursorEnd);
+                    } catch (e) {}
+                }
+            }
+
+            // Gestionar scroll inteligente de cada chat del admin
             setTimeout(() => {
                 sales.forEach(s => {
                     if (s.estado === 'Aprobado') {
                         const chatContainer = document.getElementById(`chat-messages-${s.id}`);
-                        if (chatContainer) {
+                        if (!chatContainer) return;
+
+                        const isOwnMsgSent = (options.forceScrollOrderId == s.id || lastSentChatMessageOrderId == s.id);
+                        const isFirstTime = !initializedAdminChatIds.has(s.id) || options.isInitialOpen;
+                        const prevState = prevChatStates[s.id];
+
+                        if (isOwnMsgSent || isFirstTime) {
                             chatContainer.scrollTop = chatContainer.scrollHeight;
+                            initializedAdminChatIds.add(s.id);
+                        } else if (prevState) {
+                            if (!prevState.isNearBottom) {
+                                // Preservar estrictamente posición si está navegando mensajes antiguos
+                                chatContainer.scrollTop = prevState.scrollTop;
+                            } else {
+                                // Mantener al final si ya estaba abajo
+                                chatContainer.scrollTop = chatContainer.scrollHeight;
+                            }
+                        } else {
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                            initializedAdminChatIds.add(s.id);
                         }
                     }
                 });
-            }, 50);
+
+                if (options.forceScrollOrderId) {
+                    lastSentChatMessageOrderId = null;
+                }
+
+                if (options.isDataReload || options.isRealtime) {
+                    window.scrollTo({ top: savedWindowY, behavior: 'instant' });
+                }
+            }, 30);
         }
 
         async function updatePaymentStatus(id, newStatus) {
