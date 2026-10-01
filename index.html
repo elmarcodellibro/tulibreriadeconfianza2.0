@@ -33,6 +33,16 @@
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        (function () {
+            if (typeof emailjs !== 'undefined') {
+                emailjs.init('gjupral637t1qEizS');
+            }
+        })();
+    </script>
+
     <!-- Datos Estructurados Schema.org (Google Merchant Center / Rich Results) -->
     <script id="catalog-products-jsonld" type="application/ld+json"></script>
 
@@ -2534,7 +2544,8 @@
                         registrado para iniciar la recuperación:</p>
                     <div class="form-group">
                         <input type="email" id="forgot-email-input" class="form-control"
-                            placeholder="tu-correo@ejemplo.com">
+                            placeholder="tu-correo@ejemplo.com"
+                            onkeydown="if(event.key === 'Enter') { event.preventDefault(); processForgotPassword(); }">
                     </div>
                     <div style="display: flex; gap: 8px;">
                         <button type="button" class="btn" style="padding: 6px 12px; font-size: 0.8rem;"
@@ -4330,12 +4341,39 @@
            2. CARGA BASE DE SUPABASE
         ------------------------------------------------------------- */
         window.addEventListener('DOMContentLoaded', () => {
+            if (typeof emailjs !== 'undefined') {
+                try {
+                    emailjs.init('gjupral637t1qEizS');
+                } catch (e) {
+                    console.warn("Error al inicializar EmailJS:", e);
+                }
+            }
             trackWebVisit();
             populateCitiesDropdown();
             populateCatalogCategoriesDropdown();
             updateUIState();
             fetchExchangeRate();
             setupRealtimeSubscriptions();
+
+            if (typeof supabaseClient !== 'undefined' && supabaseClient.auth) {
+                supabaseClient.auth.onAuthStateChange((event, session) => {
+                    if (event === 'PASSWORD_RECOVERY') {
+                        navigateTo('view-auth', false);
+                        const loginForm = document.getElementById('form-login');
+                        const regForm = document.getElementById('form-register');
+                        const forgotBox = document.getElementById('forgot-password-box');
+                        const newPassForm = document.getElementById('form-new-password');
+
+                        if (loginForm) loginForm.style.display = 'none';
+                        if (regForm) regForm.style.display = 'none';
+                        if (forgotBox) forgotBox.style.display = 'none';
+                        if (newPassForm) newPassForm.style.display = 'block';
+
+                        const titleEl = document.getElementById('auth-form-title');
+                        if (titleEl) titleEl.innerText = "Nueva Contraseña";
+                    }
+                });
+            }
 
             // Detectar si el usuario viene de un enlace de recuperación de Supabase
             const hash = window.location.hash;
@@ -4887,6 +4925,18 @@
                     console.error("Error al guardar perfil:", profileError.message);
                 }
 
+                // Disparar correo de bienvenida mediante EmailJS
+                if (typeof emailjs !== 'undefined') {
+                    emailjs.send('service_ul61kg6', 'template_moseivy', {
+                        to_name: name,
+                        email: email
+                    }).then(() => {
+                        console.log("Correo de bienvenida enviado exitosamente a:", email);
+                    }).catch(err => {
+                        console.warn("No se pudo enviar el correo de bienvenida:", err);
+                    });
+                }
+
                 currentUser = {
                     name: name,
                     email: email,
@@ -4919,8 +4969,10 @@
             }
 
             try {
+                // Redirección limpia a la URL base de la aplicación
+                const cleanRedirectUrl = window.location.origin + window.location.pathname;
                 const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-                    redirectTo: window.location.href,
+                    redirectTo: cleanRedirectUrl,
                 });
 
                 if (error) {
